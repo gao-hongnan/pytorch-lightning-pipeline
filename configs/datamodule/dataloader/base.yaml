@@ -1,0 +1,29 @@
+train_loader:
+    batch_size: 32
+    num_workers: 2
+    pin_memory: True
+    drop_last: False
+    shuffle: True
+    collate_fn: null
+valid_loader:
+    batch_size: 32
+    num_workers: 2
+    pin_memory: True
+    drop_last: False
+    shuffle: False
+    collate_fn: null           
+test_loader:
+    batch_size: 32
+    num_workers: 2
+    pin_memory: True
+    drop_last: False
+    shuffle: False
+    collate_fn: null
+gradcam_loader:
+    batch_size: 32
+    num_workers: 8
+    pin_memory: True
+    drop_last: False
+    shuffle: False
+    collate_fn: null  
+                

@@ -1,0 +1,9 @@
+metrics:
+  accuracy:
+    _target_: torchmetrics.classification.MulticlassAccuracy
+    num_classes: ${general.num_classes}
+    average: "micro"
+  multiclass_auroc:
+    _target_: torchmetrics.classification.MulticlassAUROC
+    num_classes: ${general.num_classes}
+    average: "macro"

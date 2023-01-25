@@ -1,0 +1,4 @@
+scheduler: "CosineAnnealingLR"  # Debug
+scheduler_kwargs:
+  T_max: ${trainer.max_epochs}
+  eta_min: 0.000001

@@ -1,0 +1,24 @@
+defaults:
+  - datamodule: base
+  - model: base
+  - criterion: base
+  - optimizer: base
+  - scheduler: base
+  - metrics: base
+  - stores: base
+  #- callbacks: base
+  # - trainer: common
+  # You typically want _self_ somewhere after the schema (base_config)
+  - _self_
+
+general:
+  num_classes: 2
+  device: "mps"
+  project_name: "rsna"
+  debug: False
+  seed: 1992
+  unique_id: ${now:%Y%m%d_%H%M%S} # in sync with hydra output dir
+
+hydra:
+  run:
+    dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with stores

@@ -1,0 +1,55 @@
+image_size: 64
+mean:
+- 0.5
+- 0.5
+- 0.5
+std:
+- 0.5
+- 0.5
+- 0.5
+inverse_mean: # -mean/std
+- -1
+- -1
+- -1
+inverse_std: # 1/std
+- 2
+- 2
+- 2
+mixup: false
+mixup_params: null
+train_transforms:
+  _target_: torchvision.transforms.Compose
+  transforms:
+    - _target_: torchvision.transforms.ToPILImage
+    - _target_: torchvision.transforms.RandomResizedCrop
+      size: ${datamodule.transforms.image_size}
+    - _target_: torchvision.transforms.RandomVerticalFlip
+      p: 0.5
+    - _target_: torchvision.transforms.RandomHorizontalFlip
+      p: 0.5
+    - _target_: torchvision.transforms.RandomRotation
+      degrees: 45
+    - _target_: torchvision.transforms.ToTensor
+    - _target_: torchvision.transforms.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}
+valid_transforms:
+  _target_: torchvision.transforms.Compose
+  transforms:
+    - _target_: torchvision.transforms.ToPILImage
+    - _target_: torchvision.transforms.Resize
+      size: ${datamodule.transforms.image_size}
+    - _target_: torchvision.transforms.ToTensor
+    - _target_: torchvision.transforms.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}
+test_transforms:
+  _target_: torchvision.transforms.Compose
+  transforms:
+    - _target_: torchvision.transforms.ToPILImage
+    - _target_: torchvision.transforms.Resize
+      size: ${datamodule.transforms.image_size}
+    - _target_: torchvision.transforms.ToTensor
+    - _target_: torchvision.transforms.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}

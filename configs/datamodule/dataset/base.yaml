@@ -1,0 +1,17 @@
+root_dir: !!python/object/apply:pathlib.PosixPath ["./data"]
+train_dir: !!python/object/apply:pathlib.PosixPath ["./data/train"]
+test_dir: !!python/object/apply:pathlib.PosixPath ["./data/test"]
+train_csv: !!python/object/apply:pathlib.PosixPath ["./data/train/train.csv"]
+test_csv: !!python/object/apply:pathlib.PosixPath ["./data/test/test.csv"]
+url: ""
+blob_file: ""
+image_extension: "png"
+image_col_name: "patient_and_image_id"
+image_path_col_name: "image_path"
+target_col_name: "cancer"
+group_by: "patient_id"
+stratify_by: "cancer"
+class_name_to_id:
+  benign: 0
+  malignant: 1
+

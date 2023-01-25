@@ -1,0 +1,27 @@
+defaults:
+  - datamodule: base
+  - model: timm
+  - criterion: base
+  - optimizer: base
+  - scheduler: base
+  - metrics: base
+  - stores: base
+  #- callbacks: base
+  - trainer: base
+  # You typically want _self_ somewhere after the schema (base_config)
+  - _self_
+
+general:
+  num_classes: 2
+  device: "mps"
+  project_name: "rsna"
+  debug: False
+  stage: "train"
+  seed: 1992
+  platform: "local"
+  unique_id: ${now:%Y%m%d_%H%M%S} # in sync with hydra output dir
+
+hydra:
+  run:
+    dir: "/kaggle/working/logs/${general.project_name}/${general.unique_id}" # in sync with stores
+    # dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with stores
