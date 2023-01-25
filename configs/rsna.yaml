@@ -6,7 +6,6 @@ defaults:
   - scheduler: base
   - metrics: base
   - stores: base
-  #- callbacks: base
   - trainer: base
   # You typically want _self_ somewhere after the schema (base_config)
   - _self_
@@ -20,8 +19,11 @@ general:
   seed: 1992
   platform: "local"
   unique_id: ${now:%Y%m%d_%H%M%S} # in sync with hydra output dir
+  output_dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with hydra output dir
+  # "/kaggle/working/logs/${general.project_name}/${general.unique_id}"
+  monitor: "valid_multiclass_auroc"
+  mode: "max"
 
 hydra:
   run:
-    dir: "/kaggle/working/logs/${general.project_name}/${general.unique_id}" # in sync with stores
-    # dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with stores
+    dir: ${general.output_dir} # in sync with stores

@@ -1,34 +1,25 @@
-"""Concrete implementation of DataModule base class."""
-# pylint: disable=all
+"""Base class for configs."""
 from __future__ import annotations
 
-import os
 from pathlib import Path
+
 try:
     from typing import Literal
 except ImportError:
     from typing_extensions import Literal
-from typing import Any, Dict, Optional, Iterable, Union, List
 
-import hydra
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf, MISSING
-from sklearn import model_selection
+from typing import Any, Dict, Iterable, List, Optional, Union
+
 import torchvision.transforms as T
-from torchmetrics import Metric
-from torchmetrics.classification import Accuracy, MulticlassAUROC, MulticlassAccuracy
-import torch
+from pydantic import BaseModel, conint, validator  # pylint:disable=no-name-in-module
 from pytorch_lightning.callbacks.callback import Callback
-from pytorch_lightning.loggers.logger import Logger
 from pytorch_lightning.loggers.csv_logs import CSVLogger
-
-# pylint:disable=no-name-in-module
-from pydantic import BaseModel, conint, validator
+from pytorch_lightning.loggers.logger import Logger
+from torchmetrics import Metric
+from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
 
 
 # pylint: disable=no-self-argument, no-self-use, too-few-public-methods
-
-
 class Dataset(BaseModel):
     # filepath configs
     root_dir: Path
@@ -66,8 +57,8 @@ class Resample(BaseModel):
 
 class Transforms(BaseModel):
     image_size: conint(ge=1)
-    mean: Any  # List[float] but hydra gives OmegaConf.ListConfig
-    std: Any
+    mean: List[float]  # hydra gives OmegaConf.ListConfig so need cast to list
+    std: List[float]
     inverse_mean: Any
     inverse_std: Any
     mixup: Optional[bool] = False

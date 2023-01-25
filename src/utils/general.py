@@ -1,20 +1,57 @@
 import os
 import random
+import sys
+import zipfile
 from pathlib import Path
-from typing import Union, List, Callable, Dict, Optional, Any
+from typing import Any, Dict, List, Optional, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import requests
 import torch
-from configs.base import Config
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from sklearn import model_selection
 from torch import nn
 from torchmetrics import Metric
-import cv2
-import matplotlib.pyplot as plt
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from pytorch_grad_cam.utils.image import show_cam_on_image
+from tqdm import tqdm
+
+from configs.base import Config
+
+
+def download_to(url: str, filename: str, destination_dir: Path) -> None:
+    """Downloads publicly shared files from Google Cloud Platform.
+
+    Saves download content in chunks. Chunk size set to large integer as
+    weights are usually pretty large.
+
+    Args:
+        destination_dir (Path): Destination directory of downloaded file.
+    """
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    with open(destination_dir / filename, "wb") as outfile, requests.get(
+        url, stream=True
+    ) as response:
+        for chunk in tqdm(response.iter_content(chunk_size=32768)):
+            if chunk:  # filter out keep-alive new chunks
+                outfile.write(chunk)
+
+
+def extract_file(destination_dir: Path, blob_file: str) -> None:
+    """Extracts the zip file to ``destination_dir``.
+
+    Args:
+        destination_dir (Path): Destination directory for extraction.
+    """
+    zip_path = destination_dir / blob_file
+    with zipfile.ZipFile(zip_path, "r") as infile:
+        file_list = infile.namelist()
+        for file in tqdm(file=sys.stdout, iterable=file_list, total=len(file_list)):
+            infile.extract(member=file, path=destination_dir)
+
+    os.remove(zip_path)
 
 
 class GradCamWrapper:

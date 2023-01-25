@@ -9,6 +9,10 @@ Jan, 2023
 
 This repository contains a PyTorch Lightning training pipeline for computer vision tasks.
 
+```
+python main.py --config-name rsna general.stage=train general.debug=True general.device=cpu datamodule.dataset.train_dir=./data datamodule.dataset.train_csv=./data/train/train.csv
+```
+
 ## Workflow
 
 ### Installation

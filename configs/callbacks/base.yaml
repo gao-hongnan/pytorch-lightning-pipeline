@@ -1,2 +1,24 @@
 callbacks:
-  - _target_: src.callbacks.history.History
+  early_stopping:
+    _target_: pytorch_lightning.callbacks.EarlyStopping
+    monitor: ${general.monitor}
+    patience: 5
+    min_delta: 0.001
+    verbose: True
+    mode: ${general.mode}
+  model_checkpoint:
+    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: ${general.monitor}
+    save_top_k: 3
+    dirpath: ${general.output_dir}
+    filename: '{epoch}-{monitor: ${general.monitor}:.6f}'
+    mode: ${general.mode}
+  learning_rate_monitor:
+    _target_: pytorch_lightning.callbacks.LearningRateMonitor
+    logging_interval: step
+  rich_progress_bar:
+    _target_: pytorch_lightning.callbacks.RichProgressBar
+    leave: True
+  model_summary:
+    _target_: pytorch_lightning.callbacks.ModelSummary
+    max_depth: 1

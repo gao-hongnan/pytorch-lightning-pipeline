@@ -5,7 +5,25 @@ log_every_n_steps: 50
 max_epochs: 3
 overfit_batches: 0.0
 precision: 16
-logger: 
+logger:
     _target_: pytorch_lightning.loggers.CSVLogger
-    save_dir: "/kaggle/working/logs/${general.project_name}/${general.unique_id}"
-    # save_dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with hydra output dir
+    save_dir: ${general.output_dir} # in sync with hydra output dir
+# callbacks:
+#     - _target_: pytorch_lightning.callbacks.EarlyStopping
+#       monitor: ${general.monitor}
+#       patience: 5
+#       min_delta: 0.001
+#       verbose: True
+#       mode: ${general.mode}
+# #     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+# #       monitor: ${general.monitor}
+# #       save_top_k: 3
+# #       dirpath: ${general.output_dir}
+# #       filename: '{epoch}-{monitor: ${general.monitor}:.6f}'
+# #       mode: ${general.mode}
+#     # - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+#     #   logging_interval: step
+# #     # - _target_: pytorch_lightning.callbacks.RichProgressBar
+# #     #   leave: True
+#     # - _target_: pytorch_lightning.callbacks.ModelSummary
+#     #   max_depth: 1
