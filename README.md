@@ -9,10 +9,6 @@ Jan, 2023
 
 This repository contains a PyTorch Lightning training pipeline for computer vision tasks.
 
-```
-python main.py --config-name rsna general.stage=train general.debug=True general.device=cpu datamodule.dataset.train_dir=./data datamodule.dataset.train_csv=./data/train/train.csv
-```
-
 ## Workflow
 
 ### Installation
@@ -40,14 +36,16 @@ If your computer does not have GPU, then you can install the CPU version of PyTo
 ~/gaohn/pytorch-lightning-pipeline (venv) $ pip3 install torch torchvision torchaudio # 1.12.1
 ```
 
-### Create Folder Structure
-
-```bash
-~/gaohn/pytorch-lightning-pipeline (venv) $ python configs/config.py
-```
-
 ### Run Training
 
-```bash
-~/gaohn/pytorch-lightning-pipeline (venv) $ python main.py
+For macOS without MPS
+
+```
+python main.py --config-name rsna general.stage=train general.debug=True general.device=cpu datamodule.dataset.train_dir=./data datamodule.dataset.train_csv=./data/train/train.csv
+```
+
+For macOS with MPS
+
+```
+python main.py --config-name rsna general.stage=train general.debug=True general.device=mps datamodule.dataset.train_dir=./data datamodule.dataset.train_csv=./data/train/train.csv
 ```

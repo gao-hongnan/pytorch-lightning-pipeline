@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-
-import torch
-import pandas as pd
-import cv2
 from typing import Any, Dict, Optional, Union
+
+import albumentations
+import cv2
+import pandas as pd
+import torch
+import torchvision
+
 from configs.base import Config
 from src.datamodules.base import AbstractDataset
 from src.utils.types import TransformTypes
-import torchvision
-import albumentations
 
 
 class ImageClassificationDataset(AbstractDataset):

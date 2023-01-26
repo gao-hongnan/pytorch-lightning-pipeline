@@ -159,17 +159,6 @@ if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
 
 
-# seed_all(42) not needed since we are using pl.seed_everything(42)
-
-
-# train_pf1: 0.310546875
-# valid_pf1: 0.236328125
-# loss=1.07, v_num=, train_accuracy_step=0.312, train_multiclass_auroc_step=0.564
-
-# train_pf1: 0.09375
-# valid_pf1: 0.19433593750
-
-
 config_dict = {
     "datamodule": {
         "dataset": {
