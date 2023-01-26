@@ -8,7 +8,7 @@ from torchmetrics import MetricCollection
 from configs.base import Config
 from src.models.model import TimmModel
 from src.utils.general import pfbeta_torch
-from src.utils.types import BatchTensor, EpochOutput
+from src.utils.types import BatchTensor, EpochOutput, StepOutput
 
 
 class ImageClassificationLightningModel(pl.LightningModule):
@@ -22,12 +22,11 @@ class ImageClassificationLightningModel(pl.LightningModule):
     def __init__(self, config: Config, model: TimmModel) -> None:
         super().__init__()
         self.config = config
-        self.config_dict = self.config.dict()
         self.model = model
         self.criterion = self._get_criterion()
         self.metrics = self._get_metrics()
         self.sigmoid_or_softmax = self._get_sigmoid_softmax()
-        self.save_hyperparameters(ignore=["model", "config", "config_dict"])
+        self.save_hyperparameters(ignore=["model", "config"])
 
     def _get_sigmoid_softmax(self) -> Union[nn.Sigmoid, nn.Softmax]:
         """Get the sigmoid or softmax function depending on loss function."""
@@ -82,15 +81,15 @@ class ImageClassificationLightningModel(pl.LightningModule):
         return logits
 
     # TODO: unsure why batch_idx is in the signature but unused in example
-    def training_step(self, batch: BatchTensor, batch_idx: int) -> torch.Tensor:
+    def training_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:
         """Training step."""
         return self._shared_step(batch, "train")
 
-    def validation_step(self, batch: BatchTensor, batch_idx: int) -> torch.Tensor:
+    def validation_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:
         """Validation step."""
         return self._shared_step(batch, "valid")
 
-    def predict_step(self, batch: BatchTensor, batch_idx: int) -> torch.Tensor:
+    def predict_step(self, batch: BatchTensor, batch_idx: int):
         """Predict step. Try-except block is to handle the case where
         I want to run inference on validation set, which has targets.
 
@@ -108,7 +107,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
             probs = self.sigmoid_or_softmax(logits)
             return probs
 
-    def _shared_step(self, batch: BatchTensor, stage: str) -> torch.Tensor:
+    def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
         assert stage in ["train", "valid"], "stage must be either train or valid"
 

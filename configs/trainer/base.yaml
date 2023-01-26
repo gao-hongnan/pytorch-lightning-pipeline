@@ -8,13 +8,13 @@ precision: 16
 logger:
     _target_: pytorch_lightning.loggers.CSVLogger
     save_dir: ${general.output_dir} # in sync with hydra output dir
-# callbacks:
-#     - _target_: pytorch_lightning.callbacks.EarlyStopping
-#       monitor: ${general.monitor}
-#       patience: 5
-#       min_delta: 0.001
-#       verbose: True
-#       mode: ${general.mode}
+callbacks:
+    - _target_: pytorch_lightning.callbacks.EarlyStopping
+      monitor: ${general.monitor}
+      patience: 5
+      min_delta: 0.001
+      verbose: True
+      mode: ${general.mode}
 #     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
 #       monitor: ${general.monitor}
 #       save_top_k: 3
