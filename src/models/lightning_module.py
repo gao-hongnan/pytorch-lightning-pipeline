@@ -86,6 +86,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
     # TODO: unsure why batch_idx is in the signature but unused in example
     def training_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:
         """Training step."""
+        print(f"Epoch {self.current_epoch}")
         return self._shared_step(batch, "train")
 
     def validation_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:

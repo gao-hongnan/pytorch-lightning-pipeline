@@ -1,10 +1,13 @@
-import pandas as pd
-from configs.base import Config
-import pytorch_lightning as pl
 from typing import Optional
-from src.datamodules.dataset import ImageClassificationDataset
+
+import pandas as pd
+import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+
+from configs.base import Config
+from src.datamodules.dataset import ImageClassificationDataset
 from src.utils.general import upsample_df
+
 
 # pylint: disable=too-many-instance-attributes
 class ImageClassificationDataModule(pl.LightningDataModule):
@@ -15,6 +18,14 @@ class ImageClassificationDataModule(pl.LightningDataModule):
         self.config = config
         self.df_folds = df_folds
         self.fold = config.datamodule.fold
+
+        self.train_df: pd.DataFrame
+        self.valid_df: pd.DataFrame
+        self.oof_df: pd.DataFrame
+        self.train_dataset: ImageClassificationDataset
+        self.valid_dataset: ImageClassificationDataset
+        self.gradcam_dataset: ImageClassificationDataset
+        self.test_dataset: ImageClassificationDataset
 
     def prepare_data(self) -> None:
         """Prepare the data for training and validation.
@@ -63,6 +74,7 @@ class ImageClassificationDataModule(pl.LightningDataModule):
             )
 
         if stage == "test":
+            self.test_df = pd.read_csv(self.config.datamodule.dataset.test_csv)
             test_transforms = self.config.datamodule.transforms.test_transforms
             self.test_dataset = ImageClassificationDataset(
                 self.config,
