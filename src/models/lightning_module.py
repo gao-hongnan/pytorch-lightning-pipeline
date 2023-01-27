@@ -103,12 +103,12 @@ class ImageClassificationLightningModel(pl.LightningModule):
             inputs, targets = batch
             logits = self(inputs)
             probs = self.sigmoid_or_softmax(logits)
-            return probs, targets
+            return {"targets": targets, "logits": logits, "probs": probs}
         except ValueError:
             inputs = batch[0]
             logits = self(inputs)
             probs = self.sigmoid_or_softmax(logits)
-            return probs
+            return {"logits": logits, "probs": probs}
 
     def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
@@ -129,7 +129,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
             prog_bar=True,
             logger=True,
         )
-        return {"loss": loss, "probs": probs, "targets": targets, "logits": logits}
+        return {"loss": loss, "targets": targets, "logits": logits, "probs": probs}
 
     def training_epoch_end(
         self, outputs: Union[EpochOutput, List[EpochOutput]]
@@ -176,7 +176,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
 
 
 class RSNALightningModel(ImageClassificationLightningModel):
-    def _shared_step(self, batch: BatchTensor, stage: str) -> torch.Tensor:
+    def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
         assert stage in ["train", "valid"], "stage must be either train or valid"
 
@@ -199,4 +199,4 @@ class RSNALightningModel(ImageClassificationLightningModel):
             prog_bar=True,
             logger=True,
         )
-        return {"loss": loss, "probs": probs, "targets": targets, "logits": logits}
+        return {"loss": loss, "targets": targets, "logits": logits, "probs": probs}

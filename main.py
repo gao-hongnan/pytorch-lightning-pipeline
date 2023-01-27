@@ -3,22 +3,14 @@ import logging
 import warnings
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
-import random
-from argparse import ArgumentParser, Namespace
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
 
-import albumentations as A
-import cv2
+from pathlib import Path
+
 import hydra
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import pytorch_lightning as pl
-import timm
 import torch
 import torchvision.transforms as T
-from configs.base import Config
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -27,16 +19,13 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_lightning.loggers import CSVLogger, WandbLogger
 from rich.pretty import pprint
-from torch import nn
-from torch.utils.data import DataLoader, Dataset
-from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
 
-from src.utils.general import read_data_as_df, preprocess, create_folds, GradCamWrapper
 from configs.base import Config
 from src.datamodules.datamodule import RSNAUpsampleDataModule
-from src.models.model import TimmModel
 from src.models.lightning_module import RSNALightningModel
+from src.models.model import TimmModel
+from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
 
 logger: logging.Logger = logging.getLogger(__name__)
 
