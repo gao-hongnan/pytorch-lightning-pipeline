@@ -15,7 +15,7 @@ outputs/
 notebooks/
 subs/
 data/
-
+.vscode/
 # C extensions
 *.so
 

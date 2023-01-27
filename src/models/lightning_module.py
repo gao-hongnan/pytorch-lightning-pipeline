@@ -27,6 +27,9 @@ class ImageClassificationLightningModel(pl.LightningModule):
         self.metrics = self._get_metrics()
         self.sigmoid_or_softmax = self._get_sigmoid_softmax()
         self.save_hyperparameters(ignore=["model", "config"])
+        self.oof_trues = []
+        self.oof_logits = []
+        self.oof_probs = []
 
     def _get_sigmoid_softmax(self) -> Union[nn.Sigmoid, nn.Softmax]:
         """Get the sigmoid or softmax function depending on loss function."""
@@ -128,18 +131,24 @@ class ImageClassificationLightningModel(pl.LightningModule):
         )
         return {"loss": loss, "probs": probs, "targets": targets, "logits": logits}
 
-    def training_epoch_end(self, outputs: EpochOutput) -> None:
+    def training_epoch_end(
+        self, outputs: Union[EpochOutput, List[EpochOutput]]
+    ) -> None:
         """See source code for more info."""
 
-    def validation_epoch_end(self, outputs: EpochOutput) -> None:
+    def validation_epoch_end(
+        self, outputs: Union[EpochOutput, List[EpochOutput]]
+    ) -> None:
         """Good to use for logging validation metrics that are not
         calculated based on average. For example, if you want to log
         pf1, it is different from accumulating pf1 from each batch
         and then averaging it. Instead, you want to accumulate
         them and then calculate pf1 on the accumulated values."""
-        return self._shared_epoch_end(outputs, "valid")
+        self._shared_epoch_end(outputs, "valid")
 
-    def _shared_epoch_end(self, outputs: EpochOutput, stage: str) -> None:
+    def _shared_epoch_end(
+        self, outputs: Union[EpochOutput, List[EpochOutput]], stage: str
+    ) -> None:
         """Shared epoch end for train and validation epoch end."""
         assert stage in ["train", "valid"], "stage must be either train or valid"
         loss = torch.stack([x["loss"] for x in outputs]).mean()
@@ -160,7 +169,10 @@ class ImageClassificationLightningModel(pl.LightningModule):
             prog_bar=True,
             logger=True,
         )
-        return {"loss": loss, "probs": probs, "targets": targets, "logits": logits}
+
+        # self.log_dict(
+        #     {"logits": logits, "targets": targets}, on_step=False, on_epoch=True
+        # )
 
 
 class RSNALightningModel(ImageClassificationLightningModel):
