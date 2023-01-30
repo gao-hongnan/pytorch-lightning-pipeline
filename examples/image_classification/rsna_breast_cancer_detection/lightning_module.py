@@ -1,12 +1,16 @@
-from typing import List, Tuple, Union
+"""Lightning module for RSNA Breast Cancer Detection."""
+from typing import List, Union
+
+import torch
 
 from src.models.lightning_module import ImageClassificationLightningModel
 from src.utils.general import pfbeta_torch
 from src.utils.types import BatchTensor, EpochOutput, StepOutput
-import torch
 
 
 class RSNALightningModel(ImageClassificationLightningModel):
+    """RSNA Lightning Module."""
+
     def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
         assert stage in ["train", "valid"], "stage must be either train or valid"
