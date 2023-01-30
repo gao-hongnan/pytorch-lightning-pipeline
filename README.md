@@ -49,3 +49,9 @@ For macOS with MPS
 ```
 python main.py --config-name rsna general.stage=train general.debug=True general.device=mps datamodule.dataset.train_dir=./data datamodule.dataset.train_csv=./data/train/train.csv
 ```
+
+Multirun all folds
+
+```
+python main.py --multirun --config-name rsna datamodule.fold=1,2,3,4 general.stage=train general.debug=True general.device=mps datamodule.dataset.train_dir=./data/train datamodule.dataset.train_csv=./data/train/train.csv
+```

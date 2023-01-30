@@ -22,8 +22,12 @@ from rich.pretty import pprint
 from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
 
 from configs.base import Config
-from src.datamodules.datamodule import RSNAUpsampleDataModule
-from src.models.lightning_module import RSNALightningModel
+from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
+    RSNAUpsampleDataModule,
+)
+from examples.image_classification.rsna_breast_cancer_detection.lightning_module import (
+    RSNALightningModel,
+)
 from src.models.model import TimmModel
 from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
 
@@ -57,7 +61,6 @@ def run(config: Config) -> None:
 
     if config.general.stage == "train":
         dm.setup(stage="train")
-        # print(dm.train_dataset[0][0].shape)
         trainer.fit(module, datamodule=dm)
 
     elif config.general.stage == "gradcam":
@@ -146,154 +149,3 @@ def main(config: DictConfig) -> None:
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
-
-
-config_dict = {
-    "datamodule": {
-        "dataset": {
-            "root_dir": Path("./data"),
-            "train_dir": Path("./data") / "train",
-            "train_csv": Path("./data") / "train" / "train.csv",
-            "test_dir": Path("./data") / "test",
-            "test_csv": Path("./data") / "test" / "test.csv",
-            "image_extension": "png",
-            'image_col_name': 'patient_and_image_id',
-            'image_path_col_name': 'image_path',
-            'target_col_name': 'cancer',
-            'group_by': 'patient_id',
-            'stratify_by': 'cancer',
-            'class_name_to_id': {'benign': 0, 'malignant': 1},
-        },
-        "resample": {
-            "resample_strategy": "StratifiedGroupKFold",
-            "resample_params": {"n_splits": 4, "shuffle": True, "random_state": 42},
-        },
-        "transforms": {
-            "image_size": 64,
-            "mean": [0.5, 0.5, 0.5],
-            "std": [0.5, 0.5, 0.5],
-            "inverse_mean": [-1, -1, -1],  # -mean/std
-            "inverse_std": [2, 2, 2],  # 1/std
-            "train_transforms": T.Compose(
-                [
-                    T.ToPILImage(),
-                    T.RandomResizedCrop(64),
-                    T.RandomVerticalFlip(p=0.5),
-                    T.RandomHorizontalFlip(p=0.5),
-                    T.RandomRotation(degrees=45),
-                    T.ToTensor(),
-                    T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-                ]
-            ),
-            "valid_transforms": T.Compose(
-                [
-                    T.ToPILImage(),
-                    T.Resize(64),
-                    T.ToTensor(),
-                    T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-                ]
-            ),
-            "test_transforms": T.Compose(
-                [
-                    T.ToPILImage(),
-                    T.Resize(64),
-                    T.ToTensor(),
-                    T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-                ]
-            ),
-        },
-        "dataloader": {
-            'test_loader': {
-                'batch_size': 32,
-                'num_workers': 2,
-                'pin_memory': True,
-                'drop_last': False,
-                'shuffle': False,
-                'collate_fn': None,
-            },
-            'train_loader': {
-                'batch_size': 32,
-                'num_workers': 2,
-                'pin_memory': True,
-                'drop_last': False,
-                'shuffle': True,
-                'collate_fn': None,
-            },
-            'valid_loader': {
-                'batch_size': 32,
-                'num_workers': 2,
-                'pin_memory': True,
-                'drop_last': False,
-                'shuffle': False,
-                'collate_fn': None,
-            },
-            'gradcam_loader': {
-                'batch_size': 8,
-                'num_workers': 2,
-                'pin_memory': True,
-                'drop_last': False,
-                'shuffle': False,
-                'collate_fn': None,
-            },
-        },
-        'debug': False,
-        'num_debug_samples': 128,
-        'fold': 1,
-        "upsample": 10,
-    },
-    "model": {
-        "model_name": "resnet18",
-        "pretrained": True,
-        "in_chans": 3,
-        "num_classes": 2,
-        "global_pool": "avg",
-        "timm_kwargs": {
-            "model_name": "resnet18",
-            "pretrained": True,
-            "in_chans": 3,
-            "num_classes": 2,
-            "global_pool": "avg",
-        },
-    },
-    "metrics": {
-        "metrics": {
-            "accuracy": MulticlassAccuracy(num_classes=2, average="micro"),
-            "multiclass_auroc": MulticlassAUROC(num_classes=2, average="macro"),
-        }
-    },
-    "criterion": {
-        "criterion": "CrossEntropyLoss",
-        "criterion_kwargs": {
-            "reduction": "mean",
-            "weight": None,
-            "label_smoothing": 0.0,
-        },
-    },
-    "optimizer": {
-        "optimizer": "AdamW",
-        "optimizer_kwargs": {"lr": 3e-4, "weight_decay": 0.0},
-    },
-    "scheduler": {
-        "scheduler": "CosineAnnealingLR",
-        "scheduler_kwargs": {"T_max": 3, "eta_min": 1e-6},
-    },
-    'general': {
-        'num_classes': 2,
-        'device': "cpu",
-        'project_name': 'rsna',
-        'debug': False,
-        'seed': 1992,
-        'platform': 'local',
-    },
-    "trainer": {
-        'accelerator': 'mps',
-        'devices': 1,  # None
-        #'fast_dev_run': 1,
-        'log_every_n_steps': 1,
-        'max_epochs': 3,
-        'overfit_batches': 0.0,
-        'logger': CSVLogger(save_dir="./logs"),
-        'precision': 16,  # "bf16",
-        'callbacks': None,
-    },
-}

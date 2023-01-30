@@ -1,3 +1,5 @@
+tmp*
+multirun/
 logs/
 /wandb
 data/

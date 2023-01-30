@@ -1,13 +1,15 @@
+"""Lightning Module class."""
 from typing import List, Tuple, Union
 
 import pytorch_lightning as pl
 import torch
 from torch import nn
 from torchmetrics import MetricCollection
+from pathlib import Path
 
 from configs.base import Config
 from src.models.model import TimmModel
-from src.utils.general import pfbeta_torch
+
 from src.utils.types import BatchTensor, EpochOutput, StepOutput
 
 
@@ -86,7 +88,6 @@ class ImageClassificationLightningModel(pl.LightningModule):
     # TODO: unsure why batch_idx is in the signature but unused in example
     def training_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:
         """Training step."""
-        print(f"Epoch {self.current_epoch}")
         return self._shared_step(batch, "train")
 
     def validation_step(self, batch: BatchTensor, batch_idx: int) -> StepOutput:
@@ -159,8 +160,9 @@ class ImageClassificationLightningModel(pl.LightningModule):
         targets = torch.cat([x["targets"] for x in outputs])
         logits = torch.cat([x["logits"] for x in outputs])
 
-        pf1 = pfbeta_torch(probs, targets, beta=1)
-        self.log(f"{stage}_pf1", pf1)
+        self.save_oof_predictions(probs, "probs")
+        self.save_oof_predictions(logits, "logits")
+        self.save_oof_predictions(targets, "targets")
 
         self.metrics[f"{stage}_metrics"](probs, targets)
         self.log_dict(
@@ -175,29 +177,10 @@ class ImageClassificationLightningModel(pl.LightningModule):
         #     {"logits": logits, "targets": targets}, on_step=False, on_epoch=True
         # )
 
-
-class RSNALightningModel(ImageClassificationLightningModel):
-    def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
-        """Shared step for train and validation step."""
-        assert stage in ["train", "valid"], "stage must be either train or valid"
-
-        inputs, targets = batch
-        logits = self(inputs)
-        loss = self.criterion(logits, targets)
-        self.log(f"{stage}_loss", loss)
-
-        probs = self.sigmoid_or_softmax(logits)
-
-        pf1 = pfbeta_torch(probs, targets, beta=1)
-        print(f"{stage}_pf1: {pf1}")
-        self.log(f"{stage}_pf1", pf1)
-
-        self.metrics[f"{stage}_metrics"](probs, targets)
-        self.log_dict(
-            self.metrics[f"{stage}_metrics"],
-            on_step=True,  # whether to log on N steps
-            on_epoch=True,
-            prog_bar=True,
-            logger=True,
+    def save_oof_predictions(self, outputs, name: str) -> None:
+        """Save out-of-fold predictions."""
+        torch.save(
+            outputs,
+            Path(self.config.general.output_dir)
+            / f"fold_{self.config.datamodule.fold}_epoch_{self.current_epoch}_{name}.pt",
         )
-        return {"loss": loss, "targets": targets, "logits": logits, "probs": probs}

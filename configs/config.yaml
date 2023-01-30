@@ -28,3 +28,6 @@ general:
 hydra:
   run:
     dir: ${general.output_dir} # in sync with stores
+  sweep: # TODO: sweep not overriding defaults
+    dir: ${general.output_dir} # in sync with stores
+    subdir: ${datamodule.fold}

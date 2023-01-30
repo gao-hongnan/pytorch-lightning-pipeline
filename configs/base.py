@@ -146,6 +146,9 @@ class General(BaseModel):
     seed: int
     platform: str  # "colab", "kaggle" or "local"
     unique_id: str
+    output_dir: str
+    monitor: str
+    mode: str
 
 
 class Trainer(BaseModel):
