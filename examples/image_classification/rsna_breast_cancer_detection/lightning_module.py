@@ -23,7 +23,7 @@ class RSNALightningModel(ImageClassificationLightningModel):
         probs = self.sigmoid_or_softmax(logits)
 
         pf1 = pfbeta_torch(probs, targets, beta=1)
-        print(f"{stage}_pf1: {pf1}")
+        # print(f"{stage}_pf1: {pf1}")
         self.log(f"{stage}_pf1", pf1)
 
         self.metrics[f"{stage}_metrics"](probs, targets)

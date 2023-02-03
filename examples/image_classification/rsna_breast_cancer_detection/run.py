@@ -48,6 +48,7 @@ def run(config: Config) -> None:
 
     if config.general.stage == "train":
         dm.setup(stage="train")
+        print(len(dm.train_dataloader()))
         trainer.fit(module, datamodule=dm)
 
     elif config.general.stage == "gradcam":
