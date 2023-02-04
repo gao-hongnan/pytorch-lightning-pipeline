@@ -23,7 +23,7 @@ callbacks:
       mode: ${general.mode}
     - _target_: pytorch_lightning.callbacks.LearningRateMonitor
       logging_interval: step
-    - _target_: pytorch_lightning.callbacks.RichProgressBar
-      leave: True
+    # - _target_: pytorch_lightning.callbacks.RichProgressBar
+    #   leave: True
     - _target_: pytorch_lightning.callbacks.ModelSummary
       max_depth: 1
