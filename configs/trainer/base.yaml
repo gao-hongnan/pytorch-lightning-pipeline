@@ -1,7 +1,7 @@
 accelerator: ${general.device}
 devices: 1
 fast_dev_run: null
-log_every_n_steps: 50
+log_every_n_steps: 500
 max_epochs: 3
 overfit_batches: 0.0
 precision: 16
