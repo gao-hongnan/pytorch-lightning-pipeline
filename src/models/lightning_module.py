@@ -126,7 +126,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
         self.metrics[f"{stage}_metrics"](probs, targets)
         self.log_dict(
             self.metrics[f"{stage}_metrics"],
-            on_step=True,  # whether to log on N steps
+            on_step=False,  # whether to log on N steps
             on_epoch=True,
             prog_bar=False,
             logger=True,
