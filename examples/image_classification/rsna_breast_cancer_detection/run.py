@@ -72,6 +72,7 @@ def run(config: Config) -> None:
         trainer.fit(module, datamodule=dm)
 
     elif config.general.stage == "evaluate":
+        # python main.py --config-name rsna general.stage=evaluate
         print("Evaluate mode")
         dm.setup(stage="evaluate")
 

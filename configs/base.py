@@ -60,8 +60,8 @@ class Transforms(BaseModel):
     image_size: conint(ge=1)
     mean: List[float]  # hydra gives OmegaConf.ListConfig so need cast to list
     std: List[float]
-    inverse_mean: Any
-    inverse_std: Any
+    inverse_mean: Optional[List[float]] = None
+    inverse_std: Optional[List[float]] = None
     mixup: Optional[bool] = False
     mixup_params: Optional[Dict[str, Any]] = None
     train_transforms: Optional[T.Compose] = None
@@ -73,10 +73,10 @@ class Transforms(BaseModel):
 
 
 class Dataloader(BaseModel):
-    train_loader: Dict[str, Any]
-    valid_loader: Dict[str, Any]
+    train_loader: Optional[Dict[str, Any]]
+    valid_loader: Optional[Dict[str, Any]]
     test_loader: Optional[Dict[str, Any]]
-    gradcam_loader: Dict[str, Any]
+    gradcam_loader: Optional[Dict[str, Any]]
 
 
 class DataModule(BaseModel):
