@@ -138,7 +138,7 @@ def run(config: Config) -> None:
             .reset_index()
         )
 
-        sub_df.to_csv("submission.csv", index=False)
+        sub_df.to_csv("/kaggle/working/submission.csv", index=False)
         print(sub_df.head())
 
     elif config.general.stage == "gradcam":
