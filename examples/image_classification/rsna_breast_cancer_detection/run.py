@@ -9,6 +9,7 @@ import torch
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
 
 from configs.base import Config
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
@@ -20,6 +21,7 @@ from examples.image_classification.rsna_breast_cancer_detection.lightning_module
 from src.models.model import TimmModel
 from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
 
+from src.metrics.pf1 import pfbeta_torch, optimize_thresholds
 
 # pylint: disable=all
 def run(config: Config) -> None:
@@ -27,13 +29,18 @@ def run(config: Config) -> None:
 
     pl.seed_everything(config.general.seed)
 
-    df = read_data_as_df(config)
+    train_file = config.datamodule.dataset.train_csv
+    test_file = config.datamodule.dataset.test_csv
+    df = read_data_as_df(train_file)
     df = preprocess(df, config)
     df_folds = create_folds(df, config)
     print(df.head())
 
+    test_df = read_data_as_df(test_file)
+    test_df = preprocess(test_df, config)
+
     # dm = RSNADataModule(config, df_folds)
-    dm = RSNAUpsampleDataModule(config, df_folds)  # upsampled
+    dm = RSNAUpsampleDataModule(config, df_folds, test_df)
     dm.prepare_data()
 
     model = TimmModel(config)
@@ -48,8 +55,66 @@ def run(config: Config) -> None:
 
     if config.general.stage == "train":
         dm.setup(stage="train")
-        print(len(dm.train_dataloader()))
+        print(f"Dataloader length: {len(dm.train_dataloader())}")
         trainer.fit(module, datamodule=dm)
+
+    elif config.general.stage == "evaluate":
+        print("Evaluate mode")
+        dm.setup(stage="evaluate")
+
+        target_checkpoints = [
+            "artifacts/rsna/fold_1_epoch_5_targets.pt",
+            "artifacts/rsna/fold_2_epoch_3_targets.pt",
+            "artifacts/rsna/fold_3_epoch_4_targets.pt",
+            "artifacts/rsna/fold_4_epoch_5_targets.pt",
+        ]
+        prob_checkpoints = [
+            "artifacts/rsna/fold_1_epoch_5_probs.pt",
+            "artifacts/rsna/fold_2_epoch_3_probs.pt",
+            "artifacts/rsna/fold_3_epoch_4_probs.pt",
+            "artifacts/rsna/fold_4_epoch_5_probs.pt",
+        ]
+        oof_targets, oof_probs = [], []
+        for target_checkpoint, prob_checkpoint in zip(
+            target_checkpoints, prob_checkpoints
+        ):
+            targets = torch.load(target_checkpoint, map_location=torch.device("cpu"))
+            probs = torch.load(prob_checkpoint, map_location=torch.device("cpu"))
+            oof_targets.append(targets)
+            oof_probs.append(probs)
+            for metric_name, metric in config.metrics.metrics.items():
+                metric_value = metric(probs, targets)
+                print(f"{metric_name}: {metric_value}")
+
+        oof_targets = torch.cat(oof_targets)
+        oof_probs = torch.cat(oof_probs)
+        for metric_name, metric in config.metrics.metrics.items():
+            metric_value = metric(oof_probs, oof_targets)
+            print(f"OOF {metric_name}: {metric_value}")
+
+        raw_pf1 = pfbeta_torch(oof_probs, oof_targets, beta=1.0)
+        print(f"OOF raw_pf1: {raw_pf1}")
+
+        binarized_pf1, threshold = optimize_thresholds(oof_probs, oof_targets)
+        print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
+
+    elif config.general.stage == "test":
+        dm.setup(stage="test")
+        test_loader = dm.test_dataloader()
+        checkpoints = [
+            "artifacts/rsna/fold1_epoch=5-valid_multiclass_auroc=0.696480.ckpt",
+            "artifacts/rsna/fold2_epoch=3-valid_multiclass_auroc=0.691854.ckpt",
+            "artifacts/rsna/fold3_epoch=4-valid_multiclass_auroc=0.685808.ckpt",
+            "artifacts/rsna/fold4_epoch=5-valid_multiclass_auroc=0.676737.ckpt",
+        ]
+        # state_dicts = [
+        #     torch.load(checkpoint, map_location=torch.device("cpu"))["state_dict"]
+        #     for checkpoint in checkpoints
+        # ]
+        predictions = trainer.predict(
+            module, dataloaders=test_loader, ckpt_path=checkpoints[0]
+        )
+        print(predictions)
 
     elif config.general.stage == "gradcam":
         dm.setup(stage="train")
@@ -83,18 +148,3 @@ def run(config: Config) -> None:
             plt.imshow(overlay, cmap="gray")
             plt.axis("off")
         plt.show()
-
-    elif config.general.stage == "evaluate":
-        print("Evaluate mode")
-        dm.setup(stage="evaluate")
-
-        # checkpoint = "/Users/gaohn/gao/pytorch-lightning-hydra/rsna/logs/lightning_logs/version_1/checkpoints/epoch=2-step=12.ckpt"
-        checkpoint = "/Users/gaohn/gao/pytorch-lightning-pipeline/outputs/rsna/20230125_151003/lightning_logs/version_0/checkpoints/epoch=2-step=12.ckpt"
-        # module = module.load_from_checkpoint(checkpoint)
-        module.load_state_dict(torch.load(checkpoint)["state_dict"])
-        valid_loader = dm.val_dataloader()
-        # predictions = trainer.predict(
-        #     module, dataloaders=valid_loader, ckpt_path=checkpoint
-        # )
-        predictions = trainer.predict(module, dataloaders=valid_loader)
-        print(predictions)

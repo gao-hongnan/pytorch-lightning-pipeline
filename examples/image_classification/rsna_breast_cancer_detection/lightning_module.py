@@ -4,7 +4,7 @@ from typing import List, Union
 import torch
 
 from src.models.lightning_module import ImageClassificationLightningModel
-from src.utils.general import pfbeta_torch
+from src.metrics.pf1 import pfbeta_torch
 from src.utils.types import BatchTensor, EpochOutput, StepOutput
 
 

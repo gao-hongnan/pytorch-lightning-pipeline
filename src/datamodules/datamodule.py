@@ -6,22 +6,26 @@ from torch.utils.data import DataLoader
 
 from configs.base import Config
 from src.datamodules.dataset import ImageClassificationDataset
-from src.utils.general import upsample_df
 
 
 # pylint: disable=too-many-instance-attributes
 class ImageClassificationDataModule(pl.LightningDataModule):
     """Data module for generic image classification dataset."""
 
-    def __init__(self, config: Config, df_folds: pd.DataFrame) -> None:
+    def __init__(
+        self,
+        config: Config,
+        df_folds: pd.DataFrame,
+        test_df: Optional[pd.DataFrame] = None,
+    ) -> None:
         super().__init__()
         self.config = config
         self.df_folds = df_folds
         self.fold = config.datamodule.fold
+        self.test_df = test_df
 
         self.train_df: pd.DataFrame
         self.valid_df: pd.DataFrame
-        self.test_df: pd.DataFrame
         self.oof_df: pd.DataFrame
         self.train_dataset: ImageClassificationDataset
         self.valid_dataset: ImageClassificationDataset
@@ -75,7 +79,6 @@ class ImageClassificationDataModule(pl.LightningDataModule):
             )
 
         if stage == "test":
-            self.test_df = pd.read_csv(self.config.datamodule.dataset.test_csv)
             test_transforms = self.config.datamodule.transforms.test_transforms
             self.test_dataset = ImageClassificationDataset(
                 self.config,

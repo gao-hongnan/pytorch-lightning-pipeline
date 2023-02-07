@@ -1,5 +1,6 @@
 tmp*
 multirun/
+artifacts/
 logs/
 /wandb
 data/

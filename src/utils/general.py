@@ -15,7 +15,7 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from sklearn import model_selection
 from torch import nn
-from torchmetrics import Metric
+
 from tqdm import tqdm
 
 from configs.base import Config
@@ -162,34 +162,6 @@ def get_sigmoid_softmax(config: Config) -> Union[nn.Sigmoid, nn.Softmax]:
     return getattr(nn, "Sigmoid")()
 
 
-class BinaryProbF1(Metric):
-    pass
-
-
-def pfbeta_torch(preds, labels, beta=1):
-    if preds.ndim == 2:
-        preds = preds[:, 1]
-    preds = preds.clip(0, 1)
-
-    y_true_count = labels.sum()
-    ctp = preds[labels == 1].sum()
-    cfp = preds[labels == 0].sum()
-
-    beta_squared = beta * beta
-
-    c_precision = ctp / (ctp + cfp)
-    c_recall = ctp / y_true_count
-
-    if c_precision > 0 and c_recall > 0:
-        return (
-            (1 + beta_squared)
-            * (c_precision * c_recall)
-            / (beta_squared * c_precision + c_recall)
-        ).item()
-    else:
-        return 0.0
-
-
 def preprocess(df: pd.DataFrame, config: Config) -> pd.DataFrame:
     """Preprocess data."""
     df[config.datamodule.dataset.image_col_name] = (
@@ -207,9 +179,9 @@ def preprocess(df: pd.DataFrame, config: Config) -> pd.DataFrame:
     return df
 
 
-def read_data_as_df(config: Config) -> pd.DataFrame:
+def read_data_as_df(filepath: str) -> pd.DataFrame:
     """Read data as a pandas dataframe."""
-    df = pd.read_csv(config.datamodule.dataset.train_csv)
+    df = pd.read_csv(filepath)
     return df
 
 
