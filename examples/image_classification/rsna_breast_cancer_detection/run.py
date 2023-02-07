@@ -39,7 +39,7 @@ def run(config: Config) -> None:
         extension=config.datamodule.dataset.image_extension,
         config=config,
     )
-    print(df.columns)
+
     df_folds = create_folds(df, config)
     print(df_folds.head())
 
@@ -115,11 +115,12 @@ def run(config: Config) -> None:
         dm.setup(stage="test")
         test_loader = dm.test_dataloader()
         checkpoints = [
-            "artifacts/rsna/fold1_epoch=5-valid_multiclass_auroc=0.696480.ckpt",
-            "artifacts/rsna/fold2_epoch=3-valid_multiclass_auroc=0.691854.ckpt",
-            "artifacts/rsna/fold3_epoch=4-valid_multiclass_auroc=0.685808.ckpt",
-            "artifacts/rsna/fold4_epoch=5-valid_multiclass_auroc=0.676737.ckpt",
+            "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold1_epoch5-valid_multiclass_auroc0.696480.ckpt",
+            "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold2_epoch3-valid_multiclass_auroc0.691854.ckpt",
+            "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold3_epoch4-valid_multiclass_auroc0.685808.ckpt",
+            "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold4_epoch5-valid_multiclass_auroc0.676737.ckpt",
         ]
+
         all_probs = inference_all_folds(
             module, checkpoints=checkpoints, test_loader=test_loader, trainer=trainer
         )
