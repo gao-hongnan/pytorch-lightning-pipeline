@@ -127,7 +127,7 @@ def run(config: Config) -> None:
         print(predictions)
         THRESHOLD = 0.501
 
-        test_df["cancer"] = predictions
+        test_df["cancer"] = predictions[:, 1]
 
         test_df["cancer"] = (test_df["cancer"] > THRESHOLD).astype(int)
 
