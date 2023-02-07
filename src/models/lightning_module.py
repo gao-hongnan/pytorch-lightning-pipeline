@@ -107,7 +107,7 @@ class ImageClassificationLightningModel(pl.LightningModule):
             probs = self.sigmoid_or_softmax(logits)
             return {"targets": targets, "logits": logits, "probs": probs}
         except ValueError:
-            inputs = batch[0]
+            inputs = batch
             logits = self(inputs)
             probs = self.sigmoid_or_softmax(logits)
             return {"logits": logits, "probs": probs}

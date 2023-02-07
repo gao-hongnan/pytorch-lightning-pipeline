@@ -22,6 +22,7 @@ from src.models.model import TimmModel
 from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
 
 from src.metrics.pf1 import pfbeta_torch, optimize_thresholds
+from src.inference import inference_all_folds
 
 # pylint: disable=all
 def run(config: Config) -> None:
@@ -32,12 +33,24 @@ def run(config: Config) -> None:
     train_file = config.datamodule.dataset.train_csv
     test_file = config.datamodule.dataset.test_csv
     df = read_data_as_df(train_file)
-    df = preprocess(df, config)
+    df = preprocess(
+        df,
+        directory=config.datamodule.dataset.train_dir,
+        extension=config.datamodule.dataset.image_extension,
+        config=config,
+    )
+
     df_folds = create_folds(df, config)
     print(df.head())
 
     test_df = read_data_as_df(test_file)
-    test_df = preprocess(test_df, config)
+    test_df = preprocess(
+        test_df,
+        directory=config.datamodule.dataset.test_dir,
+        extension=config.datamodule.dataset.image_extension,
+        config=config,
+    )
+    print(test_df.head())
 
     # dm = RSNADataModule(config, df_folds)
     dm = RSNAUpsampleDataModule(config, df_folds, test_df)
@@ -107,14 +120,10 @@ def run(config: Config) -> None:
             "artifacts/rsna/fold3_epoch=4-valid_multiclass_auroc=0.685808.ckpt",
             "artifacts/rsna/fold4_epoch=5-valid_multiclass_auroc=0.676737.ckpt",
         ]
-        # state_dicts = [
-        #     torch.load(checkpoint, map_location=torch.device("cpu"))["state_dict"]
-        #     for checkpoint in checkpoints
-        # ]
-        predictions = trainer.predict(
-            module, dataloaders=test_loader, ckpt_path=checkpoints[0]
+        all_probs = inference_all_folds(
+            module, checkpoints=checkpoints, test_loader=test_loader, trainer=trainer
         )
-        print(predictions)
+        print(all_probs)
 
     elif config.general.stage == "gradcam":
         dm.setup(stage="train")
