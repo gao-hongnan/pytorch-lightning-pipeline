@@ -27,6 +27,7 @@ class Dataset(BaseModel):
     train_csv: Path
     test_dir: Path
     test_csv: Path
+    sub_csv: Optional[Path]
     url: Optional[str]
     blob_file: Optional[str]
     image_extension: Optional[str]

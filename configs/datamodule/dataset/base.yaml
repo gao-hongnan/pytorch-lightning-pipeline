@@ -3,6 +3,7 @@ train_dir: !!python/object/apply:pathlib.PosixPath ["./data/rsna/train"]
 test_dir: !!python/object/apply:pathlib.PosixPath ["./data/rsna/test"]
 train_csv: !!python/object/apply:pathlib.PosixPath ["./data/rsna/train/train.csv"]
 test_csv: !!python/object/apply:pathlib.PosixPath ["./data/rsna/test/test.csv"]
+sub_csv: null
 url: ""
 blob_file: ""
 image_extension: "png"

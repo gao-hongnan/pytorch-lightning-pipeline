@@ -121,10 +121,25 @@ def run(config: Config) -> None:
             "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold4_epoch5-valid_multiclass_auroc0.676737.ckpt",
         ]
 
-        all_probs = inference_all_folds(
+        predictions = inference_all_folds(
             module, checkpoints=checkpoints, test_loader=test_loader, trainer=trainer
         )
-        print(all_probs)
+        print(predictions)
+        THRESHOLD = 0.501
+
+        test_df["cancer"] = predictions
+
+        test_df["cancer"] = (test_df["cancer"] > THRESHOLD).astype(int)
+
+        sub_df = (
+            test_df[["prediction_id", "cancer"]]
+            .groupby("prediction_id")
+            .max()
+            .reset_index()
+        )
+
+        sub_df.to_csv("submission.csv", index=False)
+        print(sub_df.head())
 
     elif config.general.stage == "gradcam":
         dm.setup(stage="train")
