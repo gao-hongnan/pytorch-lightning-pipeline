@@ -39,9 +39,9 @@ def run(config: Config) -> None:
         extension=config.datamodule.dataset.image_extension,
         config=config,
     )
-
+    print(df.columns)
     df_folds = create_folds(df, config)
-    print(df.head())
+    print(df_folds.head())
 
     test_df = read_data_as_df(test_file)
     test_df = preprocess(
