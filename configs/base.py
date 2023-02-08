@@ -38,7 +38,7 @@ class Dataset(BaseModel):
     target_col_name: str
     group_by: str
     stratify_by: str
-    class_name_to_id: Dict[str, int]
+    class_name_to_id: Optional[Dict[str, int]]
 
 
 class Resample(BaseModel):

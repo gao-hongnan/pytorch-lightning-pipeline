@@ -1,0 +1,10 @@
+defaults:
+    - dataset: vegfru
+    - resample: base
+    - transforms: base
+    - dataloader: base
+
+debug: ${general.debug}
+num_debug_samples: 128
+fold: 1
+upsample: 0 # 0 = false.

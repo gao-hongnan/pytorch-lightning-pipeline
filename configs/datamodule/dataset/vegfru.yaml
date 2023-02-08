@@ -1,0 +1,16 @@
+root_dir: !!python/object/apply:pathlib.PosixPath ["./data/vegfru"]
+train_dir: !!python/object/apply:pathlib.PosixPath [""]
+test_dir: !!python/object/apply:pathlib.PosixPath [""]
+train_csv: !!python/object/apply:pathlib.PosixPath ["./data/vegfru/vegfru10.csv"]
+test_csv: !!python/object/apply:pathlib.PosixPath [""]
+sub_csv: null
+url: ""
+blob_file: ""
+image_extension: "png"
+image_col_name: ""
+image_path_col_name: "image_path"
+target_col_name: "class_id"
+group_by: ""
+stratify_by: "class_id"
+
+

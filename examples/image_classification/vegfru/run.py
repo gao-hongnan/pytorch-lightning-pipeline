@@ -16,21 +16,45 @@ warnings.filterwarnings(action="ignore", category=UserWarning)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+import matplotlib.pyplot as plt
+import pytorch_lightning as pl
+import torch
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
 
-def hydra_to_pydantic(config: DictConfig) -> Config:
-    """Converts Hydra config to Pydantic config."""
-    # use to_container to resolve
-    config = OmegaConf.to_object(config)  # = to_container(config, resolve=True)
-    return Config(**config)
+from configs.base import Config
 
+from src.models.model import TimmModel
+from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
 
-# TODO: explore importlib for run
-# base_config_path = "configs."
-# config_name = opt.config_name
-# print(f"Running config: {config_name}")
+# pylint: disable=all
+def run(config: Config) -> None:
+    """Run the experiment."""
 
-# config_path = base_config_path + config_name
-# project = importlib.import_module(config_path)
+    pl.seed_everything(config.general.seed)
+
+    train_file = config.datamodule.dataset.train_csv
+    df = read_data_as_df(train_file)
+
+    df_folds = create_folds(df, config)
+    print(df_folds.head())
+
+    # dm = RSNADataModule(config, df_folds)
+    dm = RSNAUpsampleDataModule(config, df_folds)
+    dm.prepare_data()
+
+    model = TimmModel(config)
+
+    module = RSNALightningModel(config, model)
+    trainer = pl.Trainer(**config.trainer.dict())
+
+    if config.general.stage == "train":
+        dm.setup(stage="train")
+        # for OneCycleLR
+        print(f"Dataloader length: {len(dm.train_dataloader())}")
+        trainer.fit(module, datamodule=dm)
 
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
