@@ -36,8 +36,8 @@ class Dataset(BaseModel):
     image_col_name: str
     image_path_col_name: str
     target_col_name: str
-    group_by: str
-    stratify_by: str
+    group_by: Optional[str]
+    stratify_by: Optional[str]
     class_name_to_id: Optional[Dict[str, int]]
 
 
@@ -150,6 +150,7 @@ class General(BaseModel):
     output_dir: str
     monitor: str
     mode: str
+    run_path: str
 
 
 class Trainer(BaseModel):

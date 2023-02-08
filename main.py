@@ -2,6 +2,7 @@
 import logging
 import warnings
 from pathlib import Path
+import importlib
 
 import hydra
 from hydra.core.hydra_config import HydraConfig
@@ -22,15 +23,6 @@ def hydra_to_pydantic(config: DictConfig) -> Config:
     # use to_container to resolve
     config = OmegaConf.to_object(config)  # = to_container(config, resolve=True)
     return Config(**config)
-
-
-# TODO: explore importlib for run
-# base_config_path = "configs."
-# config_name = opt.config_name
-# print(f"Running config: {config_name}")
-
-# config_path = base_config_path + config_name
-# project = importlib.import_module(config_path)
 
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
@@ -58,7 +50,10 @@ def main(config: DictConfig) -> None:
     # pretty print config
     pprint(config)
 
-    run(config)
+    run_path = config.general.run_path
+    runner = importlib.import_module(run_path)
+    # run(config)
+    runner.run(config)
 
 
 if __name__ == "__main__":

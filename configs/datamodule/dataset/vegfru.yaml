@@ -7,10 +7,10 @@ sub_csv: null
 url: ""
 blob_file: ""
 image_extension: "png"
-image_col_name: ""
+image_col_name: "image_id"
 image_path_col_name: "image_path"
 target_col_name: "class_id"
-group_by: ""
+group_by: null
 stratify_by: "class_id"
 
 
