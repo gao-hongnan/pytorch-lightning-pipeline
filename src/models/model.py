@@ -26,6 +26,9 @@ class TimmModel(Model):
         # in_features in create_head() call.
         self.backbone.reset_classifier(num_classes=0, global_pool=self.global_pool)
 
+        # run sanity check
+        self.run_sanity_check()
+
     def create_backbone(self) -> nn.Module:
         """Create backbone model using timm's create_model function."""
         # TODO: pack all attributes to just one timm_kwargs
@@ -45,3 +48,11 @@ class TimmModel(Model):
         features = self.forward_features(inputs)
         logits = self.forward_head(features)
         return logits
+
+    def run_sanity_check(self) -> None:
+        """Post init sanity check."""
+        inputs = torch.randn(4, 3, 224, 224)  # assume 3 channel images
+        features = self.forward_features(inputs)
+        logits = self.forward_head(features)
+        print(f"Features shape: {features.shape}")
+        print(f"Logits shape: {logits.shape}")

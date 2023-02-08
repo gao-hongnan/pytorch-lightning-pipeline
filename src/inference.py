@@ -1,29 +1,32 @@
 from typing import List
 
 import numpy as np
+import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
+
+from src.models.lightning_module import ImageClassificationLightningModel
 
 
 @torch.inference_mode(mode=True)
 def inference_one_fold(
-    model,
+    model: ImageClassificationLightningModel,
     checkpoint: str,
     test_loader: DataLoader,
-    trainer,
+    trainer: pl.Trainer,
 ) -> np.ndarray:
-    """Inference the model on one fold.
+    """Inference the model on one fold with PyTorch Lightning Interface.
 
     Args:
-        model (Model): The model to be used for inference.
-            Note that pretrained should be set to False.
-        state_dict (collections.OrderedDict): The state dict of the model.
+        model (ImageClassificationLightningModel): The model to be used for inference.
+        checkpoint (str): The path to the checkpoint.
         test_loader (DataLoader): The dataloader for the test set.
+        trainer (pl.Trainer): The trainer class from PyTorch Lightning.
 
     Returns:
-        test_probs (np.ndarray): The predictions of the model.
+        probs (np.ndarray): The predictions (probs) of the model.
     """
-    # from predict_step
+    # trainer.predict calls from predict_step in lightning_module.py
     prediction_dict = trainer.predict(
         model, dataloaders=test_loader, ckpt_path=checkpoint
     )
@@ -33,22 +36,20 @@ def inference_one_fold(
 
 @torch.inference_mode(mode=True)
 def inference_all_folds(
-    model,
+    model: ImageClassificationLightningModel,
     checkpoints: List[str],
     test_loader: DataLoader,
-    trainer,
+    trainer: pl.Trainer,
 ) -> np.ndarray:
     """Inference the model on all K folds.
 
+    Currently does not support weighted average.
+
     Args:
-        model (Model): The model to be used for inference.
-            Note that pretrained should be set to False.
-        state_dicts (List[collections.OrderedDict]): The state dicts of the models.
-            Generally, K Fold means K state dicts.
-        test_loader (DataLoader): The dataloader for the test set.
+        checkpoints (List[str]): The list of paths to the checkpoints.
 
     Returns:
-        mean_preds (np.ndarray): The mean of the predictions of all folds.
+        mean_probs (np.ndarray): The mean of the predictions of all folds.
     """
     all_folds_probs = []
     for _fold_num, checkpoint in enumerate(checkpoints):

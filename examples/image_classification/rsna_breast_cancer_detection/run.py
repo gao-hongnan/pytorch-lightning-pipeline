@@ -57,17 +57,13 @@ def run(config: Config) -> None:
     dm.prepare_data()
 
     model = TimmModel(config)
-    inputs = torch.randn(4, 3, 224, 224)
-    features = model.forward_features(inputs)
-    logits = model.forward_head(features)
-    print(features.shape)
-    print(logits.shape)
 
     module = RSNALightningModel(config, model)
     trainer = pl.Trainer(**config.trainer.dict())
 
     if config.general.stage == "train":
         dm.setup(stage="train")
+        # for OneCycleLR
         print(f"Dataloader length: {len(dm.train_dataloader())}")
         trainer.fit(module, datamodule=dm)
 
@@ -113,6 +109,7 @@ def run(config: Config) -> None:
         print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
 
     elif config.general.stage == "test":
+        # python main.py --config-name rsna general.stage=test model.model_name=tf_efficientnetv2_s datamodule.transforms.image_size=512 general.device=cpu
         dm.setup(stage="test")
         test_loader = dm.test_dataloader()
         checkpoints = [
@@ -122,29 +119,12 @@ def run(config: Config) -> None:
             "/kaggle/input/rsna-tf-efficientnetv2-s-size512/fold4_epoch5-valid_multiclass_auroc0.676737.ckpt",
         ]
 
-        predictions = inference_all_folds(
-            module, checkpoints=checkpoints, test_loader=test_loader, trainer=trainer
-        )
+        predictions = inference_all_folds(module, checkpoints, test_loader, trainer)
         print(predictions)
-        THRESHOLD = 0.501
-
-        test_df["cancer"] = predictions[:, 1]
-
-        test_df["cancer"] = (test_df["cancer"] > THRESHOLD).astype(int)
-
-        sub_df = (
-            test_df[["prediction_id", "cancer"]]
-            .groupby("prediction_id")
-            .max()
-            .reset_index()
-        )
-
-        sub_df.to_csv("/kaggle/working/submission.csv", index=False)
-        print(sub_df.head())
 
     elif config.general.stage == "gradcam":
         dm.setup(stage="train")
-        checkpoint = "/Users/reighns/gaohn/pytorch-lightning-hydra/rsna/logs/lightning_logs/version_7/checkpoints/epoch=2-step=12.ckpt"
+        checkpoint = "artifacts/rsna/fold1_epoch=5-valid_multiclass_auroc=0.696480.ckpt"
         # module = module.load_from_checkpoint(checkpoint)
         module.load_state_dict(torch.load(checkpoint)["state_dict"])
         gradcam_loader = dm.gradcam_dataloader()

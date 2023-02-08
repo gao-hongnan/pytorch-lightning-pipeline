@@ -16,6 +16,7 @@ class RSNAUpsampleDataModule(ImageClassificationDataModule):
         )
         self.oof_df = self.valid_df.copy()
 
+        # upsample block
         if self.config.datamodule.upsample:
             print("Upsampling the data")
             self.train_df = upsample_df(self.train_df, self.config)

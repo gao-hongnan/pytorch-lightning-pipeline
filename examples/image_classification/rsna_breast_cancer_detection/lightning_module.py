@@ -9,7 +9,7 @@ from src.utils.types import BatchTensor, EpochOutput, StepOutput
 
 
 class RSNALightningModel(ImageClassificationLightningModel):
-    """RSNA Lightning Module."""
+    """RSNA Lightning Module, added pf1."""
 
     def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
@@ -22,6 +22,7 @@ class RSNALightningModel(ImageClassificationLightningModel):
 
         probs = self.sigmoid_or_softmax(logits)
 
+        # newly added
         pf1 = pfbeta_torch(probs, targets, beta=1)
         # print(f"{stage}_pf1: {pf1}")
         self.log(f"{stage}_pf1", pf1)
