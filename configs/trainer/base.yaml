@@ -13,7 +13,7 @@ callbacks:
       monitor: ${general.monitor}
       save_top_k: 2
       dirpath: ${general.output_dir}
-      filename: '{${datamodule.fold}}_{epoch}-{${general.monitor}:.6f}'
+      filename: '${datamodule.fold}_{epoch}-{${general.monitor}:.6f}'
       mode: ${general.mode}
     - _target_: pytorch_lightning.callbacks.EarlyStopping
       monitor: ${general.monitor}
