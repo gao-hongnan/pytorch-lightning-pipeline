@@ -11,9 +11,9 @@ valid_loader:
     pin_memory: True
     drop_last: False
     shuffle: False
-    collate_fn: null           
+    collate_fn: null
 test_loader:
-    batch_size: 32
+    batch_size: 3
     num_workers: 2
     pin_memory: True
     drop_last: False
@@ -25,5 +25,4 @@ gradcam_loader:
     pin_memory: True
     drop_last: False
     shuffle: False
-    collate_fn: null  
-                
+    collate_fn: null

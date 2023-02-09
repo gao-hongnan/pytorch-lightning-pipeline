@@ -27,10 +27,14 @@ def inference_one_fold(
         probs (np.ndarray): The predictions (probs) of the model.
     """
     # trainer.predict calls from predict_step in lightning_module.py
-    prediction_dict = trainer.predict(
+    prediction_dicts = trainer.predict(
         model, dataloaders=test_loader, ckpt_path=checkpoint
     )
-    probs = prediction_dict[0]["probs"].detach().cpu().numpy()
+    probs = []
+    for prediction_dict in prediction_dicts:
+        prob = prediction_dict["probs"].detach().cpu().numpy()
+        probs.append(prob)
+    probs = np.concatenate(probs)
     return probs
 
 
