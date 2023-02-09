@@ -13,7 +13,7 @@ valid_loader:
     shuffle: False
     collate_fn: null
 test_loader:
-    batch_size: 3
+    batch_size: 32
     num_workers: 2
     pin_memory: True
     drop_last: False
