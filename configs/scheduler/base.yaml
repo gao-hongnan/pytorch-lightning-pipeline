@@ -5,6 +5,11 @@
 
 scheduler: "OneCycleLR"
 scheduler_kwargs:
-  max_lr: 3e-4
+  max_lr: 5e-4
   epochs: ${trainer.max_epochs}
+  pct_start: 0.1
+  div_factor: 10
+  final_div_factor: 100
+  base_momentum: 0.90
+  max_momentum: 0.95
   steps_per_epoch: 1282

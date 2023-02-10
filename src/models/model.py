@@ -1,8 +1,14 @@
+"""Concrete implementation of the Model class for timm models."""
 from __future__ import annotations
+
+from typing import Any, Dict, Optional, Tuple
 
 import timm
 import torch
+import torchinfo
+from rich.pretty import pretty_repr, pprint
 from torch import nn
+from torchinfo.model_statistics import ModelStatistics
 
 from configs.base import Config
 from src.models.base import Model
@@ -28,6 +34,7 @@ class TimmModel(Model):
 
         # run sanity check
         self.run_sanity_check()
+        pprint(self)
 
     def create_backbone(self) -> nn.Module:
         """Create backbone model using timm's create_model function."""
@@ -56,3 +63,16 @@ class TimmModel(Model):
         logits = self.forward_head(features)
         print(f"Features shape: {features.shape}")
         print(f"Logits shape: {logits.shape}")
+
+    def __str__(self):
+        return pretty_repr(self)
+
+    def model_summary(
+        self,
+        input_size: Optional[Tuple[int, int, int, int]] = None,
+        **kwargs: Dict[str, Any]
+    ) -> ModelStatistics:
+        """Wrapper for torchinfo package to get the model summary."""
+        if input_size is None:
+            input_size = (1, 3, 224, 224)
+        return torchinfo.summary(self, input_size=input_size, **kwargs)

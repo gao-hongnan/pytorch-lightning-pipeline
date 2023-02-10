@@ -57,6 +57,7 @@ def run(config: Config) -> None:
     dm.prepare_data()
 
     model = TimmModel(config)
+    model.model_summary()
 
     module = RSNALightningModel(config, model)
     trainer = pl.Trainer(**config.trainer.dict())
@@ -134,7 +135,8 @@ def run(config: Config) -> None:
 
         # inputs = config.datamodule.transforms.valid_transforms(inputs)
 
-        target_layers = [module.model.backbone.layer4[-1]]
+        # target_layers = [module.model.backbone.layer4[-1]] # resnet
+        target_layers = [model.backbone.conv_head]  # tf_efficientnetv2_s
         gradcam = GradCAM(model=module, target_layers=target_layers, use_cuda=False)
 
         heatmaps = gradcam(inputs, targets=None, eigen_smooth=False)
