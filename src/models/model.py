@@ -12,6 +12,7 @@ from torchinfo.model_statistics import ModelStatistics
 
 from configs.base import Config
 from src.models.base import Model
+from src.models.pooling import GeM
 
 
 class TimmModel(Model):
@@ -21,6 +22,7 @@ class TimmModel(Model):
         super().__init__(config)
         self.model_name = config.model.model_name
         self.global_pool = config.model.global_pool
+        self.in_chans = config.model.in_chans
         self.num_classes = config.model.num_classes
         self.timm_kwargs = config.model.timm_kwargs
         print(f"Creating model: {self.model_name}")
@@ -33,7 +35,9 @@ class TimmModel(Model):
         self.backbone.reset_classifier(num_classes=0, global_pool=self.global_pool)
 
         # run sanity check
-        self.run_sanity_check()
+        # self.run_sanity_check()
+
+        # print model summary
         pprint(self)
 
     def create_backbone(self) -> nn.Module:
@@ -74,5 +78,42 @@ class TimmModel(Model):
     ) -> ModelStatistics:
         """Wrapper for torchinfo package to get the model summary."""
         if input_size is None:
-            input_size = (1, 3, 224, 224)
+            input_size = (1, self.in_chans, 224, 224)
         return torchinfo.summary(self, input_size=input_size, **kwargs)
+
+
+class TimmModelWithGeM(TimmModel):
+    """Model class specific to timm models."""
+
+    def __init__(self, config: Config) -> None:
+        super().__init__(config)
+        self.model_name = config.model.model_name
+        self.global_pool = config.model.global_pool
+        self.num_classes = config.model.num_classes
+        self.timm_kwargs = config.model.timm_kwargs
+        print(f"Creating model: {self.model_name}")
+
+        self.backbone = self.create_backbone()
+        self.head = self.create_head()
+
+        # hardcoded and call this after creating head since head needs to know
+        # in_features in create_head() call.
+        # FIXME: hardcoded ""
+        self.backbone.reset_classifier(num_classes=0, global_pool="")
+
+        self.gem = GeM(p_trainable=False)
+
+        # run sanity check
+        # self.run_sanity_check()
+
+        # print model summary
+        pprint(self)
+
+    def forward_features(self, inputs: torch.Tensor) -> torch.Tensor:
+        features = self.backbone(inputs)
+        # print(f"features: {features.shape}")
+        gem_features = self.gem(features)
+        # print(f"gem_features: {gem_features.shape}")
+        gem_features = gem_features[:, :, 0, 0]  # flatten
+        # print(f"gem_features: {gem_features.shape}")
+        return gem_features

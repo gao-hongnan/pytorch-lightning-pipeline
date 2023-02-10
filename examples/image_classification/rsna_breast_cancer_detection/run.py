@@ -18,8 +18,14 @@ from examples.image_classification.rsna_breast_cancer_detection.datamodule impor
 from examples.image_classification.rsna_breast_cancer_detection.lightning_module import (
     RSNALightningModel,
 )
-from src.models.model import TimmModel
-from src.utils.general import GradCamWrapper, create_folds, preprocess, read_data_as_df
+from src.models.model import TimmModel, TimmModelWithGeM
+from src.utils.general import (
+    GradCamWrapper,
+    create_folds,
+    preprocess,
+    read_data_as_df,
+    seed_all,
+)
 
 from src.metrics.pf1 import pfbeta_torch, optimize_thresholds
 from src.inference import inference_all_folds
@@ -27,7 +33,7 @@ from src.inference import inference_all_folds
 # pylint: disable=all
 def run(config: Config) -> None:
     """Run the experiment."""
-
+    # seed_all(config.general.seed)
     pl.seed_everything(config.general.seed)
 
     train_file = config.datamodule.dataset.train_csv
@@ -56,7 +62,8 @@ def run(config: Config) -> None:
     dm = RSNAUpsampleDataModule(config, df_folds, test_df)
     dm.prepare_data()
 
-    model = TimmModel(config)
+    # model = TimmModel(config)
+    model = TimmModelWithGeM(config)
     model.model_summary()
 
     module = RSNALightningModel(config, model)

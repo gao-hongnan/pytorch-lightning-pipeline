@@ -94,14 +94,14 @@ class Model(BaseModel):
     model_name: str
     pretrained: bool
     in_chans: conint(ge=1)  # in_channels must be greater than or equal to 1
-    num_classes: conint(ge=1)
+    num_classes: conint(ge=0)
     global_pool: str
 
     @validator("global_pool")
     def validate_global_pool(cls, global_pool: str) -> str:
         """Validates global_pool is in ["avg", "max"]."""
-        if global_pool not in ["avg", "max"]:
-            raise ValueError("global_pool must be avg or max")
+        if global_pool not in ["avg", "max", ""]:
+            raise ValueError("global_pool must be " ", avg or max")
         return global_pool
 
 
