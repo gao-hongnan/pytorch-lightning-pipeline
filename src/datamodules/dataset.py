@@ -54,14 +54,15 @@ class ImageClassificationDataset(AbstractDataset):
             image = self.transforms(image)
         else:
             image = torch.from_numpy(image).permute(2, 0, 1)  # convert HWC to CHW
-        return torch.tensor(image, dtype=dtype)
+        return image
+        # return torch.tensor(image, dtype=dtype) # makes a copy and take up memory
 
     # pylint: disable=no-self-use
     def apply_target_transforms(
         self, target: torch.Tensor, dtype: torch.dtype = torch.long
     ) -> torch.Tensor:
         """Apply transforms to the target."""
-        return torch.tensor(target, dtype=dtype)
+        return torch.as_tensor(target, dtype=dtype)
 
     def __getitem__(
         self, index: int
