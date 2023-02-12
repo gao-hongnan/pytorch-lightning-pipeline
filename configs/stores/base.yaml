@@ -1,4 +1,4 @@
 project_name: ${general.project_name}
 unique_id: ${general.unique_id} # in sync with hydra output dir
-logs_dir: !!python/object/apply:pathlib.PosixPath [""]
-model_artifacts_dir: !!python/object/apply:pathlib.PosixPath [""]
+logs_dir: !!python/object/apply:pathlib.Path [""]
+model_artifacts_dir: !!python/object/apply:pathlib.Path [""]

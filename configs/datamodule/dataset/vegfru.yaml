@@ -1,8 +1,8 @@
-root_dir: !!python/object/apply:pathlib.PosixPath ["./data/vegfru"]
-train_dir: !!python/object/apply:pathlib.PosixPath [""]
-test_dir: !!python/object/apply:pathlib.PosixPath [""]
-train_csv: !!python/object/apply:pathlib.PosixPath ["./data/vegfru/vegfru10.csv"]
-test_csv: !!python/object/apply:pathlib.PosixPath [""]
+root_dir: !!python/object/apply:pathlib.Path ["./data/vegfru"]
+train_dir: !!python/object/apply:pathlib.Path [""]
+test_dir: !!python/object/apply:pathlib.Path [""]
+train_csv: !!python/object/apply:pathlib.Path ["./data/vegfru/vegfru10.csv"]
+test_csv: !!python/object/apply:pathlib.Path [""]
 sub_csv: null
 url: ""
 blob_file: ""
