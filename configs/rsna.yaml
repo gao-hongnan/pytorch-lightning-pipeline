@@ -17,7 +17,6 @@ general:
   debug: False
   stage: "train"
   seed: 1992
-  platform: "local"
   unique_id: ${now:%Y%m%d_%H%M%S} # in sync with hydra output dir
   output_dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with hydra output dir
   # "/kaggle/working/logs/${general.project_name}/${general.unique_id}"

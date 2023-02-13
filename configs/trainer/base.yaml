@@ -8,23 +8,23 @@ precision: 16
 logger:
     _target_: pytorch_lightning.loggers.CSVLogger
     save_dir: ${general.output_dir} # in sync with hydra output dir
-callbacks:
-    - _target_: pytorch_lightning.callbacks.ModelCheckpoint
-      monitor: ${general.monitor}
-      save_top_k: 2
-      dirpath: ${general.output_dir}
-      filename: 'fold_${datamodule.fold}_{epoch}-{${general.monitor}:.6f}'
-      mode: ${general.mode}
-    - _target_: pytorch_lightning.callbacks.EarlyStopping
-      monitor: ${general.monitor}
-      patience: 5
-      min_delta: 0.001
-      verbose: True
-      mode: ${general.mode}
-    - _target_: pytorch_lightning.callbacks.LearningRateMonitor
-      logging_interval: step
-    - _target_: pytorch_lightning.callbacks.RichProgressBar
-      refresh_rate: 0
-      leave: False
-    - _target_: pytorch_lightning.callbacks.ModelSummary
-      max_depth: 1
+# callbacks:
+#     - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+#       monitor: ${general.monitor}
+#       save_top_k: 2
+#       dirpath: ${general.output_dir}
+#       filename: 'fold_${datamodule.fold}_{epoch}-{${general.monitor}:.6f}'
+#       mode: ${general.mode}
+#     - _target_: pytorch_lightning.callbacks.EarlyStopping
+#       monitor: ${general.monitor}
+#       patience: 5
+#       min_delta: 0.001
+#       verbose: True
+#       mode: ${general.mode}
+#     - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+#       logging_interval: step
+#     - _target_: pytorch_lightning.callbacks.RichProgressBar
+#       refresh_rate: 0
+#       leave: False
+#     - _target_: pytorch_lightning.callbacks.ModelSummary
+#       max_depth: 1
