@@ -145,12 +145,13 @@ class General(BaseModel):
     debug: bool
     stage: str  # "train", "test", "inference"
     seed: int
-    platform: str  # "colab", "kaggle" or "local"
     unique_id: str
     output_dir: str
     monitor: str
     mode: str
     run_path: str
+    experiment_id: str
+    experiment_df_path: str
 
 
 class Trainer(BaseModel):

@@ -1,7 +1,3 @@
-# FIXME: find out if checkpoint is indeed saving the best epoch and not the last epoch
-# FIXME: history object's valid_probs return list of 10 instead but in the checkpoint it is 1
-# FIXME: rename oof_... to valid_... in the checkpoint
-# FIXME: OOF should be for all folds, not just one fold
 def create_oof_df(pipeline_config: PipelineConfig) -> None:
     """Create OOF dataframe for Generic Image Dataset with a Resampling Strategy."""
     num_classes = pipeline_config.model.num_classes

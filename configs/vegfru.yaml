@@ -24,6 +24,7 @@ general:
   mode: "max"
   run_path: "examples.image_classification.vegfru.run" # this is the path to each project's run script
 
+
 hydra:
   run:
     dir: ${general.output_dir} # in sync with stores

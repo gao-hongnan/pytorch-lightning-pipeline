@@ -3,6 +3,7 @@ import warnings
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
+import pandas as pd
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 import torch
@@ -24,8 +25,10 @@ from src.utils.general import (
     create_folds,
     preprocess,
     read_data_as_df,
+    read_experiments_as_df_by_id,
     seed_all,
 )
+from rich import print
 
 from src.metrics.pf1 import pfbeta_torch, optimize_thresholds
 from src.inference import inference_all_folds
@@ -33,8 +36,8 @@ from src.inference import inference_all_folds
 # pylint: disable=all
 def run(config: Config) -> None:
     """Run the experiment."""
+    pl.seed_everything(config.general.seed, workers=True)
     # seed_all(config.general.seed)
-    pl.seed_everything(config.general.seed)
 
     train_file = config.datamodule.dataset.train_csv
     test_file = config.datamodule.dataset.test_csv
@@ -79,23 +82,20 @@ def run(config: Config) -> None:
         # python main.py --config-name rsna general.stage=evaluate
         print("Evaluate mode")
         dm.setup(stage="evaluate")
+        df_oof = df_folds.copy()
 
-        target_checkpoints = [
-            "artifacts/rsna/fold_1_epoch_5_targets.pt",
-            "artifacts/rsna/fold_2_epoch_3_targets.pt",
-            "artifacts/rsna/fold_3_epoch_4_targets.pt",
-            "artifacts/rsna/fold_4_epoch_5_targets.pt",
-        ]
-        prob_checkpoints = [
-            "artifacts/rsna/fold_1_epoch_5_probs.pt",
-            "artifacts/rsna/fold_2_epoch_3_probs.pt",
-            "artifacts/rsna/fold_3_epoch_4_probs.pt",
-            "artifacts/rsna/fold_4_epoch_5_probs.pt",
-        ]
+        experiment_df_path = config.general.experiment_df_path
+        experiment_id = config.general.experiment_id
+        experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
+
+        target_checkpoints = experiment_df["oof_targets"].values
+        prob_checkpoints = experiment_df["oof_probs"].values
+
         oof_targets, oof_probs = [], []
-        for target_checkpoint, prob_checkpoint in zip(
-            target_checkpoints, prob_checkpoints
+        for fold, (target_checkpoint, prob_checkpoint) in enumerate(
+            zip(target_checkpoints, prob_checkpoints)
         ):
+            fold = fold + 1
             targets = torch.load(target_checkpoint, map_location=torch.device("cpu"))
             probs = torch.load(prob_checkpoint, map_location=torch.device("cpu"))
             oof_targets.append(targets)
@@ -104,6 +104,15 @@ def run(config: Config) -> None:
                 metric_value = metric(probs, targets)
                 print(f"{metric_name}: {metric_value}")
 
+            df_oof.loc[df_oof["fold"] == fold, "oof_targets"] = targets.numpy()
+            df_oof.loc[
+                df_oof["fold"] == fold,
+                [
+                    f"class_{str(c)}_oof_probs"
+                    for c in range(config.general.num_classes)
+                ],
+            ] = probs.numpy()
+
         oof_targets = torch.cat(oof_targets)
         oof_probs = torch.cat(oof_probs)
         for metric_name, metric in config.metrics.metrics.items():
@@ -111,21 +120,41 @@ def run(config: Config) -> None:
             print(f"OOF {metric_name}: {metric_value}")
 
         raw_pf1 = pfbeta_torch(oof_probs, oof_targets, beta=1.0)
-        print(f"OOF raw_pf1: {raw_pf1}")
+        print(f"OOF raw_pf1: {raw_pf1} without threshold")
 
         binarized_pf1, threshold = optimize_thresholds(oof_probs, oof_targets)
+        print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
+
+        ### hardcoded only for rsna ###
+        df_oof["prediction_id"] = (
+            df_oof["patient_id"].astype(str) + "_" + df_oof["laterality"].astype(str)
+        )
+        df_oof = df_oof.groupby('prediction_id').max()  # .mean() #
+        df_oof = df_oof.sort_index()
+        df_oof = df_oof[df_oof["fold"] == 1]
+        oof_probs = torch.from_numpy(
+            df_oof[
+                [f"class_{str(c)}_oof_probs" for c in range(config.general.num_classes)]
+            ].values
+        )
+        oof_targets = torch.from_numpy(df_oof["oof_targets"].values)
+        raw_pf1 = pfbeta_torch(oof_probs, oof_targets.flatten(), beta=1.0)
+        print(f"OOF raw_pf1: {raw_pf1} without threshold")
+        binarized_pf1, threshold = optimize_thresholds(oof_probs, oof_targets.flatten())
         print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
 
     elif config.general.stage == "test":
         # python main.py --config-name rsna general.stage=test model.model_name=tf_efficientnetv2_s datamodule.transforms.image_size=512 general.device=mps
         dm.setup(stage="test")
         test_loader = dm.test_dataloader()
-        checkpoints = [
-            "artifacts/rsna/fold1_epoch=5-valid_multiclass_auroc=0.696480.ckpt",
-            "artifacts/rsna/fold2_epoch=3-valid_multiclass_auroc=0.691854.ckpt",
-            "artifacts/rsna/fold3_epoch=4-valid_multiclass_auroc=0.685808.ckpt",
-            "artifacts/rsna/fold4_epoch=5-valid_multiclass_auroc=0.676737.ckpt",
-        ]
+
+        experiment_df_path = config.general.experiment_df_path
+        experiment_id = config.general.experiment_id
+        experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
+
+        checkpoints = experiment_df["weight_paths"].values
+
+        print(f"Checkpoints: {checkpoints}")
 
         predictions = inference_all_folds(module, checkpoints, test_loader, trainer)
         print(predictions)

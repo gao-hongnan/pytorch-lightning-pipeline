@@ -87,6 +87,8 @@ class TimmModelWithGeM(TimmModel):
 
     def __init__(self, config: Config) -> None:
         super().__init__(config)
+        # no super init because we don't want to call the parent's init
+        # as run_sanity_check will fail in parent class with new attribute gem
         self.model_name = config.model.model_name
         self.global_pool = config.model.global_pool
         self.num_classes = config.model.num_classes
@@ -98,7 +100,8 @@ class TimmModelWithGeM(TimmModel):
 
         # hardcoded and call this after creating head since head needs to know
         # in_features in create_head() call.
-        # FIXME: hardcoded ""
+        # FIXME: hardcoded the global_pool to "" since GeM is used this is bad
+        # because in config we have global_pool set to "avg" but it is not used
         self.backbone.reset_classifier(num_classes=0, global_pool="")
 
         self.gem = GeM(p_trainable=False)
@@ -111,9 +114,6 @@ class TimmModelWithGeM(TimmModel):
 
     def forward_features(self, inputs: torch.Tensor) -> torch.Tensor:
         features = self.backbone(inputs)
-        # print(f"features: {features.shape}")
         gem_features = self.gem(features)
-        # print(f"gem_features: {gem_features.shape}")
         gem_features = gem_features[:, :, 0, 0]  # flatten
-        # print(f"gem_features: {gem_features.shape}")
         return gem_features

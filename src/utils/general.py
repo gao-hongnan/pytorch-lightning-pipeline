@@ -1,3 +1,4 @@
+"""General utility functions."""
 import os
 import random
 import sys
@@ -19,6 +20,15 @@ from torch import nn
 from tqdm import tqdm
 
 from configs.base import Config
+
+
+def read_experiments_as_df_by_id(
+    experiments_path: str, experiment_id: str
+) -> pd.DataFrame:
+    """Fetches experiment data from experiments.csv."""
+    df = pd.read_csv(experiments_path)
+    df = df[df["experiment_id"] == experiment_id]
+    return df
 
 
 def download_to(url: str, filename: str, destination_dir: Path) -> None:
