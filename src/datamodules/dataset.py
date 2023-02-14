@@ -1,3 +1,4 @@
+"""A sample template for Image Classification Dataset."""
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Union
@@ -21,7 +22,7 @@ class ImageClassificationDataset(AbstractDataset):
         config: Config,
         df: Optional[pd.DataFrame] = None,
         transforms: TransformTypes = None,
-        stage: str = "train",
+        dataset_stage: str = "train",
         **kwargs: Dict[str, Any],
     ) -> None:
         """Constructor for the dataset class."""
@@ -30,12 +31,12 @@ class ImageClassificationDataset(AbstractDataset):
         self.image_ids = df[config.datamodule.dataset.image_col_name].values
         self.targets = (
             df[config.datamodule.dataset.target_col_name].values
-            if stage != "test"
+            if dataset_stage != "test"
             else None
         )
         self.df = df
         self.transforms = transforms
-        self.stage = stage
+        self.dataset_stage = dataset_stage
         self.config = config
 
     def __len__(self) -> int:
@@ -73,14 +74,14 @@ class ImageClassificationDataset(AbstractDataset):
 
         # Get target for all modes except for test dataset.
         # If test, replace target with dummy ones as placeholder.
-        target = self.targets[index] if self.stage != "test" else torch.ones(1)
+        target = self.targets[index] if self.dataset_stage != "test" else torch.ones(1)
         target = self.apply_target_transforms(target)
 
-        if self.stage in ["train", "valid", "evaluate", "debug"]:
+        if self.dataset_stage in ["train", "valid", "evaluate", "debug"]:
             return image, target
-        elif self.stage == "test":
+        elif self.dataset_stage == "test":
             return image
-        elif self.stage == "gradcam":
+        elif self.dataset_stage == "gradcam":
             # get image id as well to show on matplotlib image!
             # original image is needed to overlay the heatmap
             original_image = cv2.resize(
@@ -92,4 +93,4 @@ class ImageClassificationDataset(AbstractDataset):
             )
             return original_image, image, target, self.image_ids[index]
         else:
-            raise ValueError(f"Invalid stage {self.stage}.")
+            raise ValueError(f"Invalid stage {self.dataset_stage}.")

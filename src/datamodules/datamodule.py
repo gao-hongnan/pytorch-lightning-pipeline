@@ -1,3 +1,4 @@
+"""A sample template for Image Classification DataModule."""
 from typing import Optional
 
 import pandas as pd
@@ -16,12 +17,13 @@ class ImageClassificationDataModule(pl.LightningDataModule):
         self,
         config: Config,
         df_folds: pd.DataFrame,
+        fold: int,
         test_df: Optional[pd.DataFrame] = None,
     ) -> None:
         super().__init__()
         self.config = config
         self.df_folds = df_folds
-        self.fold = config.datamodule.fold
+        self.fold = fold # instead of config.datamodule.fold for clarity
         self.test_df = test_df
 
         self.train_df: pd.DataFrame
@@ -35,7 +37,17 @@ class ImageClassificationDataModule(pl.LightningDataModule):
     def prepare_data(self) -> None:
         """Prepare the data for training and validation.
         This method prepares state that needs to be set once per node (i.e. download data, etc.).
+
+        DO NOT SET STATE HERE!
         """
+
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        """Assign train/val datasets for use in dataloaders.
+        This method is called on every GPU in distributed training."""
+        # FIXME: may need to change stage to have fit since lightning needs fit
+        # for callbacks such as devicestatmonitor.
+        print(f"Stage: {stage}")
         print(f"Using Fold Number {self.fold}")
         self.train_df = self.df_folds[self.df_folds["fold"] != self.fold].reset_index(
             drop=True
@@ -52,10 +64,7 @@ class ImageClassificationDataModule(pl.LightningDataModule):
             self.valid_df = self.valid_df.sample(num_debug_samples)
             self.oof_df = self.valid_df.copy()
 
-    def setup(self, stage: Optional[str] = None) -> None:
-        """Assign train/val datasets for use in dataloaders.
-        This method is called on every GPU in distributed training."""
-        if stage in ["train", "valid", "evaluate", "debug"]:
+        if stage == "fit":
             train_transforms = self.config.datamodule.transforms.train_transforms
             valid_transforms = self.config.datamodule.transforms.valid_transforms
 

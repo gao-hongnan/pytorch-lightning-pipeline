@@ -143,7 +143,7 @@ class General(BaseModel):
     device: str  # torch.device("cuda" if torch.cuda.is_available() else "cpu")
     project_name: str
     debug: bool
-    stage: str  # "train", "test", "inference"
+    dataset_stage: str  # "train", "test", "inference"
     seed: int
     unique_id: str
     output_dir: str

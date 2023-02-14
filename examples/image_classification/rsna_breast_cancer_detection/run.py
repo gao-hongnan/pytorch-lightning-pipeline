@@ -39,6 +39,8 @@ def run(config: Config) -> None:
     pl.seed_everything(config.general.seed, workers=True)
     # seed_all(config.general.seed)
 
+    fold = config.datamodule.fold
+
     train_file = config.datamodule.dataset.train_csv
     test_file = config.datamodule.dataset.test_csv
     df = read_data_as_df(train_file)
@@ -62,8 +64,7 @@ def run(config: Config) -> None:
     print(test_df.head())
 
     # dm = RSNADataModule(config, df_folds)
-    dm = RSNAUpsampleDataModule(config, df_folds, test_df)
-    dm.prepare_data()
+    dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
 
     # model = TimmModel(config)
     model = TimmModelWithGeM(config)
@@ -72,13 +73,15 @@ def run(config: Config) -> None:
     module = RSNALightningModel(config, model)
     trainer = pl.Trainer(**config.trainer.dict())
 
-    if config.general.stage == "train":
-        dm.setup(stage="train")
+    if config.general.dataset_stage == "train":
+        dm.setup(stage="fit")
+        train_dataloader = dm.train_dataloader()
+        valid_dataloader = dm.val_dataloader()
         # for OneCycleLR
-        print(f"Dataloader length: {len(dm.train_dataloader())}")
-        trainer.fit(module, datamodule=dm)
+        print(f"Dataloader length: {len(train_dataloader)}")
+        trainer.fit(module, train_dataloader, valid_dataloader)
 
-    elif config.general.stage == "evaluate":
+    elif config.general.dataset_stage == "evaluate":
         # python main.py --config-name rsna general.stage=evaluate
         print("Evaluate mode")
         dm.setup(stage="evaluate")
@@ -143,7 +146,7 @@ def run(config: Config) -> None:
         binarized_pf1, threshold = optimize_thresholds(oof_probs, oof_targets.flatten())
         print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
 
-    elif config.general.stage == "test":
+    elif config.general.dataset_stage == "test":
         # python main.py --config-name rsna general.stage=test model.model_name=tf_efficientnetv2_s datamodule.transforms.image_size=512 general.device=mps
         dm.setup(stage="test")
         test_loader = dm.test_dataloader()
@@ -159,7 +162,7 @@ def run(config: Config) -> None:
         predictions = inference_all_folds(module, checkpoints, test_loader, trainer)
         print(predictions)
 
-    elif config.general.stage == "gradcam":
+    elif config.general.dataset_stage == "gradcam":
         dm.setup(stage="train")
         checkpoint = "artifacts/rsna/fold1_epoch=5-valid_multiclass_auroc=0.696480.ckpt"
         # module = module.load_from_checkpoint(checkpoint)
