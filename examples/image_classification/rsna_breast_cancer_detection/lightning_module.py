@@ -64,7 +64,3 @@ class RSNALightningModel(ImageClassificationLightningModel):
             prog_bar=True,
             logger=True,
         )
-
-        # self.log_dict(
-        #     {"logits": logits, "targets": targets}, on_step=False, on_epoch=True
-        # )
