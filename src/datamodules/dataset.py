@@ -42,9 +42,7 @@ class ImageClassificationDataset(AbstractDataset):
         """Return the length of the dataset."""
         return len(self.df)
 
-    def apply_image_transforms(
-        self, image: torch.Tensor, dtype: torch.dtype = torch.float32
-    ) -> torch.Tensor:
+    def apply_image_transforms(self, image: torch.Tensor) -> torch.Tensor:
         """Apply transforms to the image."""
         if self.transforms and isinstance(self.transforms, albumentations.Compose):
             image = self.transforms(image=image)["image"]
