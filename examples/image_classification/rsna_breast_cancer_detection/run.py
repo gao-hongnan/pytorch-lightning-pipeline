@@ -82,7 +82,7 @@ def run(config: Config) -> None:
         trainer.fit(module, train_dataloader, valid_dataloader)
 
     elif config.general.dataset_stage == "evaluate":
-        # python main.py --config-name rsna general.stage=evaluate
+        # python main.py --config-name rsna general.dataset_stage=evaluate
         print("Evaluate mode")
         dm.setup(stage="evaluate")
         df_oof = df_folds.copy()
@@ -91,14 +91,18 @@ def run(config: Config) -> None:
         experiment_id = config.general.experiment_id
         experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
 
-        target_checkpoints = experiment_df["oof_targets"].values
-        prob_checkpoints = experiment_df["oof_probs"].values
+        target_checkpoints = experiment_df["oof_targets"].apply(lambda s: s.split(", ")).values[0]
+        prob_checkpoints = experiment_df["oof_probs"].apply(lambda s: s.split(", ")).values[0]
+
+        print(target_checkpoints)
+        print(prob_checkpoints)
 
         oof_targets, oof_probs = [], []
         for fold, (target_checkpoint, prob_checkpoint) in enumerate(
             zip(target_checkpoints, prob_checkpoints)
         ):
             fold = fold + 1
+
             targets = torch.load(target_checkpoint, map_location=torch.device("cpu"))
             probs = torch.load(prob_checkpoint, map_location=torch.device("cpu"))
             oof_targets.append(targets)
@@ -134,7 +138,8 @@ def run(config: Config) -> None:
         )
         df_oof = df_oof.groupby('prediction_id').max()  # .mean() #
         df_oof = df_oof.sort_index()
-        df_oof = df_oof[df_oof["fold"] == 1]
+        #df_oof = df_oof[df_oof["fold"] == 1]
+        df_oof = df_oof[df_oof["fold"].isin([1, 3, 4])]
         oof_probs = torch.from_numpy(
             df_oof[
                 [f"class_{str(c)}_oof_probs" for c in range(config.general.num_classes)]
