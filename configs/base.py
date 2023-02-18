@@ -1,4 +1,17 @@
-"""Base class for configs."""
+"""Base class for configs.
+
+TODO:
+1. Currently, the final class `Config` is made up of (polymorphic) subclasses
+and does not allow easy modifications. As an example, if I want to extend the
+model class `Model` to `ModelWithGeM`, I have to modify the `Config` class
+manually to change the `model` field to `Union[Model, ModelWithGeM]`.
+An alternative is of course to create another file, say `configs/rsna_pydantic.py`
+and create a new class `RSNAConfig` that inherits from `Config` and modify the
+`model` field to `ModelWithGeM`.
+2. Currently, point 1 is not implemented since you then need to specify the
+pydantic config path using importlib. See `importlib.import_module(run_path)` in
+`main.py`.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -97,16 +110,15 @@ class Model(BaseModel):
     num_classes: conint(ge=0)
     global_pool: str
 
+    timm_kwargs: Dict[str, Any]
+    model_class: Any
+
     @validator("global_pool")
     def validate_global_pool(cls, global_pool: str) -> str:
         """Validates global_pool is in ["avg", "max"]."""
         if global_pool not in ["avg", "max", ""]:
             raise ValueError("global_pool must be " ", avg or max")
         return global_pool
-
-
-class TimmModel(Model):
-    timm_kwargs: Dict[str, Any]
 
 
 class Criterion(BaseModel):
@@ -175,7 +187,7 @@ class Trainer(BaseModel):
 
 class Config(BaseModel):
     datamodule: DataModule
-    model: TimmModel
+    model: Model
     criterion: Criterion
     optimizer: Optimizer
     scheduler: Scheduler

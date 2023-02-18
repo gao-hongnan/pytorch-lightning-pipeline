@@ -10,7 +10,7 @@ import torch
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from torchmetrics.classification import MulticlassAccuracy, MulticlassAUROC
+from hydra.utils import instantiate
 
 from configs.base import Config
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
@@ -66,8 +66,14 @@ def run(config: Config) -> None:
     # dm = RSNADataModule(config, df_folds)
     dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
 
-    # model = TimmModel(config)
-    model = TimmModelWithGeM(config)
+    # FIXME: Extremely dangerous here because instantiate takes in `config` as
+    # the first argument, but my `Model` class constructor also take in `config`
+    # as argument, so I have to pass in `config` as the second argument.
+    # This is not allowed since you cannot have two same keyword arguments.
+    # Workaround is either to change the name of the argument in the constructor to
+    # say `cfg` or use positional arguments.
+    # model = instantiate(config=model, config=config, _recursive_=False)
+    model = instantiate(config.model.model_class, config, _recursive_ = False)
     model.model_summary()
 
     module = RSNALightningModel(config, model)

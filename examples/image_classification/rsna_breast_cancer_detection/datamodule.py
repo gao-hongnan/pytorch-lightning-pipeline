@@ -1,8 +1,9 @@
-from src.datamodules.datamodule import ImageClassificationDataModule
-from src.utils.general import upsample_df
 from typing import Optional
 
+from src.datamodules.datamodule import ImageClassificationDataModule
 from src.datamodules.dataset import ImageClassificationDataset
+from src.utils.general import upsample_df
+
 
 class RSNAUpsampleDataModule(ImageClassificationDataModule):
     def setup(self, stage: Optional[str] = None) -> None:

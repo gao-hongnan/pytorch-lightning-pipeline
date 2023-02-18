@@ -11,7 +11,6 @@ from omegaconf import DictConfig, OmegaConf
 from rich.pretty import pprint
 
 from configs.base import Config
-from examples.image_classification.rsna_breast_cancer_detection.run import run
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
@@ -50,9 +49,9 @@ def main(config: DictConfig) -> None:
     # pretty print config
     pprint(config)
 
+    # user must specify the run path for their run.py file
     run_path = config.general.run_path
     runner = importlib.import_module(run_path)
-    # run(config)
     runner.run(config)
 
 

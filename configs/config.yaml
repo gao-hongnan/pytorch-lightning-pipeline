@@ -1,6 +1,6 @@
 defaults:
   - datamodule: base
-  - model: timm
+  - model: base
   - criterion: base
   - optimizer: base
   - scheduler: base

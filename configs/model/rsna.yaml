@@ -12,3 +12,5 @@ timm_kwargs:
   global_pool: ${model.global_pool}
   drop_rate: 0.5
   drop_path_rate: 0.4
+model_class:
+  _target_: src.models.model.TimmModelWithGeM
