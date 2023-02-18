@@ -97,6 +97,7 @@ class DataModule(BaseModel):
     resample: Resample
     transforms: Transforms
     dataloader: Dataloader
+    datamodule_class: Any
     debug: bool = False
     num_debug_samples: int = 128
     fold: int = 1  # this is the validation fold
@@ -111,7 +112,7 @@ class Model(BaseModel):
     global_pool: str
 
     timm_kwargs: Dict[str, Any]
-    model_class: Any
+    model_class: Any # TODO: change to Dict[str, Any]?
 
     @validator("global_pool")
     def validate_global_pool(cls, global_pool: str) -> str:

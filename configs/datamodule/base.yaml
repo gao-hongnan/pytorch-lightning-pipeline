@@ -4,6 +4,8 @@ defaults:
     - transforms: base
     - dataloader: base
 
+datamodule_class:
+  _target_: examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule
 debug: ${general.debug}
 num_debug_samples: 128
 fold: 1

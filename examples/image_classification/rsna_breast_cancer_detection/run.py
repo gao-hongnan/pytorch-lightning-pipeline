@@ -64,6 +64,13 @@ def run(config: Config) -> None:
     print(test_df.head())
 
     # dm = RSNADataModule(config, df_folds)
+    # dm = instantiate(
+    #     config.datamodule.datamodule_class,
+    #     config,
+    #     df_folds=df_folds,
+    #     fold=fold,
+    #     test_df=test_df,
+    # )
     dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
 
     # FIXME: Extremely dangerous here because instantiate takes in `config` as
@@ -73,7 +80,7 @@ def run(config: Config) -> None:
     # Workaround is either to change the name of the argument in the constructor to
     # say `cfg` or use positional arguments.
     # model = instantiate(config=model, config=config, _recursive_=False)
-    model = instantiate(config.model.model_class, config, _recursive_ = False)
+    model = instantiate(config.model.model_class, config, _recursive_=False)
     model.model_summary()
 
     module = RSNALightningModel(config, model)
@@ -97,8 +104,12 @@ def run(config: Config) -> None:
         experiment_id = config.general.experiment_id
         experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
 
-        target_checkpoints = experiment_df["oof_targets"].apply(lambda s: s.split(", ")).values[0]
-        prob_checkpoints = experiment_df["oof_probs"].apply(lambda s: s.split(", ")).values[0]
+        target_checkpoints = (
+            experiment_df["oof_targets"].apply(lambda s: s.split(", ")).values[0]
+        )
+        prob_checkpoints = (
+            experiment_df["oof_probs"].apply(lambda s: s.split(", ")).values[0]
+        )
 
         print(target_checkpoints)
         print(prob_checkpoints)
@@ -144,7 +155,7 @@ def run(config: Config) -> None:
         )
         df_oof = df_oof.groupby('prediction_id').max()  # .mean() #
         df_oof = df_oof.sort_index()
-        #df_oof = df_oof[df_oof["fold"] == 1]
+        # df_oof = df_oof[df_oof["fold"] == 1]
         df_oof = df_oof[df_oof["fold"].isin([1, 3, 4])]
         oof_probs = torch.from_numpy(
             df_oof[
