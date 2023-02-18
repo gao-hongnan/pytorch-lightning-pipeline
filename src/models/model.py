@@ -98,10 +98,9 @@ class TimmModelWithGeM(TimmModel):
         self.backbone = self.create_backbone()
         self.head = self.create_head()
 
-        # hardcoded and call this after creating head since head needs to know
-        # in_features in create_head() call.
         # FIXME: hardcoded the global_pool to "" since GeM is used this is bad
-        # because in config we have global_pool set to "avg" but it is not used
+        # because in config we have global_pool set to "avg" but it is not used.
+        # Find out a way to fix this.
         self.backbone.reset_classifier(num_classes=0, global_pool="")
 
         self.gem = GeM(p_trainable=False)

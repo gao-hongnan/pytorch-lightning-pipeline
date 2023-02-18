@@ -112,7 +112,7 @@ class Model(BaseModel):
     global_pool: str
 
     timm_kwargs: Dict[str, Any]
-    model_class: Any # TODO: change to Dict[str, Any]?
+    model_class: Any  # TODO: change to Dict[str, Any]?
 
     @validator("global_pool")
     def validate_global_pool(cls, global_pool: str) -> str:
