@@ -60,6 +60,8 @@ class BinaryPFBeta(Metric):
         Returns:
             None
         """
+        preds = preds.to("cpu")
+        labels = labels.to("cpu")
         if preds.ndim == 2:
             preds = preds[:, 1]
         preds = preds.clip(0, 1)
