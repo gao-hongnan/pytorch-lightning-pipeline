@@ -4,7 +4,7 @@ defaults:
   - criterion: base
   - optimizer: base
   - scheduler: base
-  - metrics: base
+  - metrics: rsna
   - stores: base
   - trainer: base
   # You typically want _self_ somewhere after the schema (base_config)

@@ -22,7 +22,7 @@ datamodule.upsample=0 \
 datamodule.datamodule_class._target_=examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule \
 model.model_class._target_=src.models.model.TimmModelWithGeM
 
-Epoch 2: 100%|█| 8/8 [00:27<00:00,  3.45s/it, loss=0.649, v_num=0, train_accuracy_step=0.812, train_multiclass_auroc_step=0.290,
+Epoch 2: 100%|█| 8/8 [00:27<00:00,  3.45s/it, loss=0.649, v_num=0, train_accuracy_step=0.812, train_multiclass_auroc_step=0.290, train_binary_pf1_step=0.00533
 
 3. Upsample, epoch = 1
 

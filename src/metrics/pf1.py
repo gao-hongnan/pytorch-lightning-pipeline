@@ -1,14 +1,7 @@
 """Probabilistic F1 score for binary classification."""
-import torch
-from torchmetrics import Metric
-import numpy as np
 from typing import Tuple
 
-
-import torch
-from torchmetrics import Metric
-
-
+import numpy as np
 import torch
 from torchmetrics import Metric
 
@@ -19,7 +12,8 @@ class BinaryPFBeta(Metric):
 
     Args:
         beta: Float value of beta parameter in F-beta score. Default is 1.
-        dist_sync_on_step: Synchronize metric state across processes at each forward pass. Default is False.
+        dist_sync_on_step: Synchronize metric state across processes at each forward pass.
+            Default is False.
 
     Shape:
         - Preds: (N, ) or (N, C)
@@ -35,16 +29,25 @@ class BinaryPFBeta(Metric):
         tensor(0.4732)
 
     Reference:
-        [1] Powers, David M. "Evaluation: from precision, recall and F-measure to ROC, informedness, markedness & correlation."
+        [1] Powers, David M. "Evaluation: from precision, recall and F-measure to ROC,
+            informedness, markedness & correlation."
             Journal of machine learning technologies 2.1 (2011): 37-63.
     """
 
     def __init__(self, beta: float = 1, dist_sync_on_step: bool = False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         self.beta = beta
-        self.add_state("ctp", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("cfp", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("y_true_count", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state(
+            "ctp", default=torch.tensor(0, dtype=torch.float), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "cfp", default=torch.tensor(0, dtype=torch.float), dist_reduce_fx="sum"
+        )
+        self.add_state(
+            "y_true_count",
+            default=torch.tensor(0, dtype=torch.float),
+            dist_reduce_fx="sum",
+        )
 
     def update(self, preds: torch.Tensor, labels: torch.Tensor):
         """
@@ -76,12 +79,13 @@ class BinaryPFBeta(Metric):
         beta_squared = self.beta ** 2
 
         if c_precision > 0 and c_recall > 0:
-            return (
+            pf1 = (
                 (1 + beta_squared)
                 * (c_precision * c_recall)
                 / (beta_squared * c_precision + c_recall)
-            ).item()
-        return 0.0
+            )
+            return pf1
+        return torch.tensor(0.0, dtype=torch.float)
 
     def reset(self):
         """
@@ -90,9 +94,9 @@ class BinaryPFBeta(Metric):
         Returns:
             None
         """
-        self.ctp = torch.tensor(0)
-        self.cfp = torch.tensor(0)
-        self.y_true_count = torch.tensor(0)
+        self.ctp = torch.tensor(0, dtype=torch.float)
+        self.cfp = torch.tensor(0, dtype=torch.float)
+        self.y_true_count = torch.tensor(0, dtype=torch.float)
 
 
 def pfbeta_torch(preds: torch.Tensor, labels: torch.Tensor, beta: float = 1) -> float:

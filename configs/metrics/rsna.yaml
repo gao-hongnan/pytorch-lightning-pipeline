@@ -1,0 +1,12 @@
+metrics:
+  accuracy:
+    _target_: torchmetrics.classification.MulticlassAccuracy
+    num_classes: ${general.num_classes}
+    average: "micro"
+  multiclass_auroc:
+    _target_: torchmetrics.classification.MulticlassAUROC
+    num_classes: ${general.num_classes}
+    average: "macro"
+  binary_pf1:
+    _target_: src.metrics.pf1.BinaryPFBeta
+    beta: 1.0
