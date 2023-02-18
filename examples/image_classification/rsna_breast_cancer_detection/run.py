@@ -95,6 +95,7 @@ def run(config: Config) -> None:
                 # FIXME: to remove this hardcoding
                 pass
             else:
+                print(f"len(train_dataloader): {len(train_dataloader)}")
                 config.scheduler.scheduler_kwargs["steps_per_epoch"] = len(
                     train_dataloader
                 )
