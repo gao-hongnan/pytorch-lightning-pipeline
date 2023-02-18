@@ -63,15 +63,14 @@ def run(config: Config) -> None:
     )
     print(test_df.head())
 
-    # dm = RSNADataModule(config, df_folds)
-    # dm = instantiate(
-    #     config.datamodule.datamodule_class,
-    #     config,
-    #     df_folds=df_folds,
-    #     fold=fold,
-    #     test_df=test_df,
-    # )
-    dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
+    dm = instantiate(
+        config.datamodule.datamodule_class,
+        config,
+        df_folds=df_folds,
+        fold=fold,
+        test_df=test_df,
+    )
+    # dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
 
     # FIXME: Extremely dangerous here because instantiate takes in `config` as
     # the first argument, but my `Model` class constructor also take in `config`
@@ -90,8 +89,18 @@ def run(config: Config) -> None:
         dm.setup(stage="fit")
         train_dataloader = dm.train_dataloader()
         valid_dataloader = dm.val_dataloader()
-        # for OneCycleLR
-        print(f"Dataloader length: {len(train_dataloader)}")
+        # for OneCycleLR, hardcoded since hydra cannot interpolate.
+        if config.scheduler.scheduler == "OneCycleLR":
+            if config.general.debug:
+                # FIXME: to remove this hardcoding
+                pass
+            else:
+                config.scheduler.scheduler_kwargs["steps_per_epoch"] = len(
+                    train_dataloader
+                )
+            print(
+                f"steps_per_epoch: {config.scheduler.scheduler_kwargs['steps_per_epoch']}"
+            )
         trainer.fit(module, train_dataloader, valid_dataloader)
 
     elif config.general.dataset_stage == "evaluate":

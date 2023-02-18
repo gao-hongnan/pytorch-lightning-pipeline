@@ -23,7 +23,7 @@ class ImageClassificationDataModule(pl.LightningDataModule):
         super().__init__()
         self.config = config
         self.df_folds = df_folds
-        self.fold = fold # instead of config.datamodule.fold for clarity
+        self.fold = fold  # instead of config.datamodule.fold for clarity
         self.test_df = test_df
 
         self.train_df: pd.DataFrame
@@ -41,12 +41,12 @@ class ImageClassificationDataModule(pl.LightningDataModule):
         DO NOT SET STATE HERE!
         """
 
-
     def setup(self, stage: Optional[str] = None) -> None:
         """Assign train/val datasets for use in dataloaders.
-        This method is called on every GPU in distributed training."""
-        # FIXME: may need to change stage to have fit since lightning needs fit
-        # for callbacks such as devicestatmonitor.
+        This method is called on every GPU in distributed training.
+
+        Note that we need to adhere to the allowed namings for the stages:
+        - fit, evaluate, predict etc."""
         print(f"Stage: {stage}")
         print(f"Using Fold Number {self.fold}")
         self.train_df = self.df_folds[self.df_folds["fold"] != self.fold].reset_index(

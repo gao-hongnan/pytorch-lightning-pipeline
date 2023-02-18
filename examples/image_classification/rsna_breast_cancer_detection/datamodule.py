@@ -1,5 +1,5 @@
-from typing import Optional
-from torch.utils.data import Sampler
+from typing import Optional, Iterable
+from torch.utils.data import Sampler, Dataset, DataLoader
 import numpy as np
 
 from src.datamodules.datamodule import ImageClassificationDataModule
@@ -8,7 +8,9 @@ from src.utils.general import upsample_df
 
 
 class BalanceSampler(Sampler):
-    def __init__(self, dataset, ratio=8):
+    """Ensures that each batch sees minority samples."""
+
+    def __init__(self, dataset: Dataset, ratio: int = 8) -> None:
         self.r = ratio - 1
         self.dataset = dataset
         self.pos_index = np.where(dataset.df.cancer > 0)[0]
@@ -16,7 +18,7 @@ class BalanceSampler(Sampler):
 
         self.length = self.r * int(np.floor(len(self.neg_index) / self.r))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[int]:
         pos_index = self.pos_index.copy()
         neg_index = self.neg_index.copy()
         np.random.shuffle(pos_index)
@@ -28,7 +30,7 @@ class BalanceSampler(Sampler):
         index = np.concatenate([pos_index, neg_index], -1).reshape(-1)
         return iter(index)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
 
@@ -91,3 +93,23 @@ class RSNAUpsampleDataModule(ImageClassificationDataModule):
                 dataset_stage="test",
                 transforms=test_transforms,
             )
+
+
+class RSNAUpsampleBalancedSamplerDataModule(RSNAUpsampleDataModule):
+    """Upsample and Balanced Sampler DataModule."""
+
+    def train_dataloader(self) -> DataLoader:
+        """Train dataloader."""
+        balance_sampler = BalanceSampler(self.train_dataset, ratio=8)
+        self.config.datamodule.dataloader.train_loader.pop("shuffle", None)
+        return DataLoader(
+            self.train_dataset,
+            sampler=balance_sampler,
+            **self.config.datamodule.dataloader.train_loader,
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        """This is normal Sequential Sampler."""
+        return DataLoader(
+            self.valid_dataset, **self.config.datamodule.dataloader.valid_loader
+        )

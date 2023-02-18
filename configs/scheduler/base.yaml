@@ -1,8 +1,3 @@
-# scheduler: "CosineAnnealingLR"  # Debug
-# scheduler_kwargs:
-#   T_max: ${trainer.max_epochs}
-#   eta_min: 0.000001
-
 scheduler: "OneCycleLR"
 scheduler_kwargs:
   max_lr: 5e-4

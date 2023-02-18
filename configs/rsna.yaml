@@ -6,7 +6,7 @@ defaults:
   - scheduler: base
   - metrics: rsna
   - stores: base
-  - trainer: base
+  - trainer: rsna
   # You typically want _self_ somewhere after the schema (base_config)
   - _self_
 
@@ -17,8 +17,8 @@ general:
   debug: False
   dataset_stage: "train"
   seed: 1992
-  unique_id: ${now:%Y%m%d_%H%M%S} # in sync with hydra output dir
-  output_dir: "outputs/${general.project_name}/${general.unique_id}" # in sync with hydra output dir
+  unique_id: ${now:%Y-%B-%d_%H-%M-%S} # in sync with hydra output dir
+  output_dir: "outputs/${general.project_name}/${general.unique_id}-${general.experiment_id}" # in sync with hydra output dir
   # "/kaggle/working/logs/${general.project_name}/${general.unique_id}"
   monitor: "valid_multiclass_auroc"
   mode: "max"
