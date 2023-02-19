@@ -54,6 +54,7 @@ model.model_class._target_=src.models.model.TimmModelWithGeM
 
 Epoch 0: 100%|█| 8/8 [00:25<00:00,  3.13s/it, loss=0.727, v_num=0, train_accuracy_step=0.688, train_binary_pf1_step=0.219
 
+5. heng augs
 
 python main.py --config-name rsna_heng \
 general.dataset_stage=train \

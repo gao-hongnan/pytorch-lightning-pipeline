@@ -2,6 +2,7 @@
 from typing import List, Union
 
 import torch
+from torch import nn
 
 from src.models.lightning_module import ImageClassificationLightningModel
 from src.metrics.pf1 import pfbeta_torch
@@ -10,6 +11,16 @@ from src.utils.types import BatchTensor, EpochOutput, StepOutput
 
 class RSNALightningModel(ImageClassificationLightningModel):
     """RSNA Lightning Module, added pf1."""
+
+    def _get_criterion(self) -> nn.Module:
+        """Get loss function."""
+        if self.config.criterion.criterion_kwargs["weight"] is not None:
+            self.config.criterion.criterion_kwargs["weight"] = torch.tensor(
+                self.config.criterion.criterion_kwargs["weight"]
+            ).to(self.device)
+        return getattr(nn, self.config.criterion.criterion)(
+            **self.config.criterion.criterion_kwargs
+        )
 
     def _shared_step(self, batch: BatchTensor, stage: str) -> StepOutput:
         """Shared step for train and validation step."""
