@@ -24,6 +24,7 @@ except ImportError:
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import torchvision.transforms as T
+import albumentations as A
 from pydantic import BaseModel, conint, validator  # pylint:disable=no-name-in-module
 from pytorch_lightning.callbacks.callback import Callback
 from pytorch_lightning.loggers.csv_logs import CSVLogger
@@ -77,9 +78,9 @@ class Transforms(BaseModel):
     inverse_std: Optional[List[float]] = None
     mixup: Optional[bool] = False
     mixup_params: Optional[Dict[str, Any]] = None
-    train_transforms: Optional[T.Compose] = None
-    valid_transforms: Optional[T.Compose] = None
-    test_transforms: Optional[T.Compose] = None
+    train_transforms: Optional[Union[T.Compose, A.Compose]] = None
+    valid_transforms: Optional[Union[T.Compose, A.Compose]] = None
+    test_transforms: Optional[Union[T.Compose, A.Compose]] = None
 
     class Config:
         arbitrary_types_allowed = True  # allow T.Compose

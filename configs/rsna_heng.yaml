@@ -1,5 +1,5 @@
 defaults:
-  - datamodule: base
+  - datamodule: rsna
   - model: rsna
   - criterion: base
   - optimizer: base

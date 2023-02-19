@@ -1,0 +1,12 @@
+defaults:
+    - dataset: base
+    - resample: base
+    - transforms: rsna
+    - dataloader: base
+
+datamodule_class:
+  _target_: examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule
+debug: ${general.debug}
+num_debug_samples: 128
+fold: 1
+upsample: 0 # 0 = false.

@@ -120,6 +120,12 @@ def run(config: Config) -> None:
         prob_checkpoints = (
             experiment_df["oof_probs"].apply(lambda s: s.split(", ")).values[0]
         )
+        target_checkpoints = [
+            "artifacts/rsna/seresnext50_32x4d-upsample-balanced-sampler-1024/seresnext50_32x4d-upsample-balanced-sampler-1024_fold_1_epoch_7_targets.pt"
+        ]
+        prob_checkpoints = [
+            "artifacts/rsna/seresnext50_32x4d-upsample-balanced-sampler-1024/seresnext50_32x4d-upsample-balanced-sampler-1024_fold_1_epoch_7_probs.pt"
+        ]
 
         print(target_checkpoints)
         print(prob_checkpoints)
@@ -165,8 +171,8 @@ def run(config: Config) -> None:
         )
         df_oof = df_oof.groupby('prediction_id').max()  # .mean() #
         df_oof = df_oof.sort_index()
-        # df_oof = df_oof[df_oof["fold"] == 1]
-        df_oof = df_oof[df_oof["fold"].isin([1, 3, 4])]
+        df_oof = df_oof[df_oof["fold"] == 1]
+        # df_oof = df_oof[df_oof["fold"].isin([1, 3, 4])]
         oof_probs = torch.from_numpy(
             df_oof[
                 [f"class_{str(c)}_oof_probs" for c in range(config.general.num_classes)]

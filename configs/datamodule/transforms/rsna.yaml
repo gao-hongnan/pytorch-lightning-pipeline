@@ -1,0 +1,79 @@
+image_size: 64
+mean:
+- 0.5
+- 0.5
+- 0.5
+std:
+- 0.5
+- 0.5
+- 0.5
+inverse_mean: # -mean/std
+- -1
+- -1
+- -1
+inverse_std: # 1/std
+- 2
+- 2
+- 2
+mixup: false
+mixup_params: null
+train_transforms:
+  _target_: albumentations.Compose
+  transforms:
+    - _target_: albumentations.HorizontalFlip
+      p: 0.5
+    - _target_: albumentations.RandomBrightnessContrast
+      brightness_limit: 0.2
+      contrast_limit: 0.2
+    - _target_: albumentations.ShiftScaleRotate
+      shift_limit: 0.1
+      scale_limit: 0.3
+      rotate_limit: 30
+      border_mode: 0
+      p: 0.7
+    - _target_: albumentations.ElasticTransform
+      alpha: ${datamodule.transforms.image_size}
+      sigma: 51.2 # hardcoded image_size * 0.05
+      alpha_affine: 30.72 # hardcoded image_size * 0.03
+      p: 0.25
+    - _target_: albumentations.Cutout
+      num_holes: 5
+      max_h_size: 300 # hardcoded image_size * 0.3
+      max_w_size: 300
+      p: 0.25
+    - _target_: albumentations.Resize
+      height: ${datamodule.transforms.image_size}
+      width: ${datamodule.transforms.image_size}
+      always_apply: true
+    - _target_: albumentations.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0
+valid_transforms:
+  _target_: albumentations.Compose
+  transforms:
+    - _target_: albumentations.Resize
+      height: ${datamodule.transforms.image_size}
+      width: ${datamodule.transforms.image_size}
+      always_apply: true
+    - _target_: albumentations.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0
+test_transforms:
+  _target_: albumentations.Compose
+  transforms:
+    - _target_: albumentations.Resize
+      height: ${datamodule.transforms.image_size}
+      width: ${datamodule.transforms.image_size}
+      always_apply: true
+    - _target_: albumentations.Normalize
+      mean: ${datamodule.transforms.mean}
+      std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0
