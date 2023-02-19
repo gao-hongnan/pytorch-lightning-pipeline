@@ -16,7 +16,7 @@ class RSNALightningModel(ImageClassificationLightningModel):
         """Get loss function."""
         if self.config.criterion.criterion_kwargs["weight"] is not None:
             self.config.criterion.criterion_kwargs["weight"] = torch.tensor(
-                self.config.criterion.criterion_kwargs["weight"]
+                self.config.criterion.criterion_kwargs["weight"], dtype=torch.float
             ).to(self.device)
         return getattr(nn, self.config.criterion.criterion)(
             **self.config.criterion.criterion_kwargs
