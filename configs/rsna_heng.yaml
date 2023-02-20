@@ -25,6 +25,7 @@ general:
   run_path: "examples.image_classification.rsna_breast_cancer_detection.run" # this is the path to each project's run script
   experiment_id: "exp_2_tf_efficientnetv2_s_gem_1024"
   experiment_df_path: "./data/rsna/experiments.csv"
+  resume_from_checkpoint: null
 
 hydra:
   run:

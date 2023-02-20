@@ -166,6 +166,7 @@ class General(BaseModel):
     run_path: str
     experiment_id: str
     experiment_df_path: str
+    resume_from_checkpoint: Optional[str]  # checks if checkpoint exists
 
 
 class Trainer(BaseModel):

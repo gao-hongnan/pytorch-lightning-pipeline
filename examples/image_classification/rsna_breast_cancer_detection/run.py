@@ -37,7 +37,6 @@ from src.inference import inference_all_folds
 def run(config: Config) -> None:
     """Run the experiment."""
     pl.seed_everything(config.general.seed, workers=True)
-    # seed_all(config.general.seed)
 
     fold = config.datamodule.fold
 
@@ -70,7 +69,6 @@ def run(config: Config) -> None:
         fold=fold,
         test_df=test_df,
     )
-    # dm = RSNAUpsampleDataModule(config, df_folds, fold, test_df)
 
     # FIXME: Extremely dangerous here because instantiate takes in `config` as
     # the first argument, but my `Model` class constructor also take in `config`
@@ -82,7 +80,12 @@ def run(config: Config) -> None:
     model = instantiate(config.model.model_class, config, _recursive_=False)
     model.model_summary()
 
-    module = RSNALightningModel(config, model)
+    if config.general.resume_from_checkpoint:
+        module = RSNALightningModel(config, model)
+    else:
+        module = RSNALightningModel.load_from_checkpoint(
+            config.general.resume_from_checkpoint, config=config, model=model
+        )
     trainer = pl.Trainer(**config.trainer.dict())
 
     if config.general.dataset_stage == "train":
