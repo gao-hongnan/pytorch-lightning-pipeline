@@ -80,9 +80,10 @@ def run(config: Config) -> None:
     model = instantiate(config.model.model_class, config, _recursive_=False)
     model.model_summary()
 
-    if config.general.resume_from_checkpoint:
+    if config.general.resume_from_checkpoint is None:
         module = RSNALightningModel(config, model)
     else:
+        print(config.general.resume_from_checkpoint)
         module = RSNALightningModel.load_from_checkpoint(
             config.general.resume_from_checkpoint, config=config, model=model
         )
