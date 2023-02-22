@@ -17,7 +17,8 @@ from examples.image_classification.rsna_breast_cancer_detection.lightning_module
     RSNALightningModel,
 )
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
-    create_folds, preprocess
+    create_folds,
+    preprocess,
 )
 from src.inference import inference_all_folds
 from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
@@ -55,6 +56,7 @@ def run(config: Config) -> None:
         test_df,
         directory=config.datamodule.dataset.test_dir,
         extension=config.datamodule.dataset.image_extension,
+        nested=False,
         config=config,
     )
     print(test_df.head())
