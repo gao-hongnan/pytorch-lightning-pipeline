@@ -6,8 +6,35 @@ from sklearn import model_selection
 
 from src.datamodules.datamodule import ImageClassificationDataModule
 from src.datamodules.dataset import ImageClassificationDataset
-from src.utils.general import upsample_df
+from src.utils.general import upsample_df, return_filepath
 from configs.base import Config
+
+
+def preprocess(
+    df: pd.DataFrame, directory: str, extension: str, nested: bool, config: Config
+) -> pd.DataFrame:
+    """Preprocess data specific to RSNA.
+
+    If nested, the images are stored as follows:
+    - train_images
+        - patient_id
+            - image_id.png"""
+
+    if nested:
+        df[config.datamodule.dataset.image_col_name] = (
+            df.patient_id.astype(str) + "/" + df.image_id.astype(str)
+        )
+    else:
+        df[config.datamodule.dataset.image_col_name] = (
+            df["patient_id"].astype(str) + "_" + df["image_id"].astype(str)
+        )
+
+    df[config.datamodule.dataset.image_path_col_name] = df[
+        config.datamodule.dataset.image_col_name
+    ].apply(
+        lambda x: return_filepath(image_id=x, folder=directory, extension=extension)
+    )
+    return df
 
 
 def create_folds(df: pd.DataFrame, config: Config) -> pd.DataFrame:

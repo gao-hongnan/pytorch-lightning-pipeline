@@ -4,7 +4,6 @@ import warnings
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
 import matplotlib.pyplot as plt
-import pandas as pd
 import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
@@ -18,14 +17,13 @@ from examples.image_classification.rsna_breast_cancer_detection.lightning_module
     RSNALightningModel,
 )
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
-    create_folds,
+    create_folds, preprocess
 )
 from src.inference import inference_all_folds
 from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
 from src.utils.general import (
     GradCamWrapper,
     # create_folds,
-    preprocess,
     read_data_as_df,
     read_experiments_as_df_by_id,
 )
@@ -45,6 +43,7 @@ def run(config: Config) -> None:
         df,
         directory=config.datamodule.dataset.train_dir,
         extension=config.datamodule.dataset.image_extension,
+        nested=True,
         config=config,
     )
 
@@ -108,6 +107,7 @@ def run(config: Config) -> None:
 
     elif config.general.dataset_stage == "evaluate":
         # python main.py --config-name rsna general.dataset_stage=evaluate
+        # TODO: currently experiment_df is hardcoded, manually adding experiment artifacts.
         print("Evaluate mode")
         dm.setup(stage="evaluate")
         df_oof = df_folds.copy()

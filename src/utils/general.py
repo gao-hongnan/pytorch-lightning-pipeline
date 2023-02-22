@@ -172,21 +172,6 @@ def get_sigmoid_softmax(config: Config) -> Union[nn.Sigmoid, nn.Softmax]:
     return getattr(nn, "Sigmoid")()
 
 
-def preprocess(
-    df: pd.DataFrame, directory: str, extension: str, config: Config
-) -> pd.DataFrame:
-    """Preprocess data."""
-    df[config.datamodule.dataset.image_col_name] = (
-        df["patient_id"].astype(str) + "_" + df["image_id"].astype(str)
-    )
-    df[config.datamodule.dataset.image_path_col_name] = df[
-        config.datamodule.dataset.image_col_name
-    ].apply(
-        lambda x: return_filepath(image_id=x, folder=directory, extension=extension)
-    )
-    return df
-
-
 def read_data_as_df(filepath: str) -> pd.DataFrame:
     """Read data as a pandas dataframe."""
     df = pd.read_csv(filepath)
