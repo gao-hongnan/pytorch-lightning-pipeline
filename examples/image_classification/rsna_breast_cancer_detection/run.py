@@ -17,18 +17,21 @@ from examples.image_classification.rsna_breast_cancer_detection.lightning_module
     RSNALightningModel,
 )
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
-    create_folds,
+    # create_folds,
     preprocess,
 )
 from src.inference import inference_all_folds
 from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
 from src.utils.general import (
     GradCamWrapper,
-    # create_folds,
+    create_folds,
     read_data_as_df,
     read_experiments_as_df_by_id,
 )
 
+### NOTE ###
+# If debug mode, import create_folds from src.utils.general
+# and use nested=False in preprocess.
 
 # pylint: disable=all
 def run(config: Config) -> None:
@@ -44,7 +47,7 @@ def run(config: Config) -> None:
         df,
         directory=config.datamodule.dataset.train_dir,
         extension=config.datamodule.dataset.image_extension,
-        nested=True,
+        nested=False,
         config=config,
     )
 
