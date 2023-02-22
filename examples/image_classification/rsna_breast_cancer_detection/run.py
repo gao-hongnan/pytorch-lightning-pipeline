@@ -3,35 +3,33 @@ import warnings
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 import pytorch_lightning as pl
 import torch
+from hydra.utils import instantiate
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from hydra.utils import instantiate
+from rich import print
 
 from configs.base import Config
-from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
-    RSNAUpsampleDataModule,
-)
 from examples.image_classification.rsna_breast_cancer_detection.lightning_module import (
     RSNALightningModel,
 )
-from src.models.model import TimmModel, TimmModelWithGeM
+from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
+    create_folds,
+)
+from src.inference import inference_all_folds
+from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
 from src.utils.general import (
     GradCamWrapper,
-    create_folds,
+    # create_folds,
     preprocess,
     read_data_as_df,
     read_experiments_as_df_by_id,
-    seed_all,
 )
-from rich import print
 
-from src.metrics.pf1 import pfbeta_torch, optimize_thresholds
-from src.inference import inference_all_folds
 
 # pylint: disable=all
 def run(config: Config) -> None:

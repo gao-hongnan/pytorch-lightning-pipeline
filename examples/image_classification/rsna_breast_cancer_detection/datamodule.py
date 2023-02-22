@@ -1,10 +1,54 @@
 from typing import Optional, Iterable
 from torch.utils.data import Sampler, Dataset, DataLoader
 import numpy as np
+import pandas as pd
+from sklearn import model_selection
 
 from src.datamodules.datamodule import ImageClassificationDataModule
 from src.datamodules.dataset import ImageClassificationDataset
 from src.utils.general import upsample_df
+from configs.base import Config
+
+
+def create_folds(df: pd.DataFrame, config: Config) -> pd.DataFrame:
+    """Create a new column called "fold" and assign fold number to each row. Omit the use
+    of train_test_split since the same result can be achieved by using
+    (Stratified)KFold with n_splits=2."""
+    cv = getattr(model_selection, config.datamodule.resample.resample_strategy)(
+        **config.datamodule.resample.resample_params
+    )
+
+    # custom stratification, prevent data leakage
+    num_bins = 5
+    df["age_bin"] = pd.cut(df['age'].values.reshape(-1), bins=num_bins, labels=False)
+    strat_cols = [
+        'laterality',
+        'view',
+        'biopsy',
+        'invasive',
+        'BIRADS',
+        'age_bin',
+        'implant',
+        'density',
+        'machine_id',
+        'difficult_negative_case',
+        'cancer',
+    ]
+
+    df["stratify"] = ""
+    for col in strat_cols:
+        df['stratify'] += df[col].astype(str)
+
+    group_by = config.datamodule.dataset.group_by
+    stratify_by = config.datamodule.dataset.stratify_by
+    stratify = df[stratify_by].values if stratify_by else None
+    groups = df[group_by].values if group_by else None
+
+    for _fold, (_train_idx, valid_idx) in enumerate(cv.split(df, stratify, groups)):
+        df.loc[valid_idx, "fold"] = _fold + 1
+    df["fold"] = df["fold"].astype(int)
+    print(df.groupby(["fold", config.datamodule.dataset.target_col_name]).size())
+    return df
 
 
 class BalanceSampler(Sampler):

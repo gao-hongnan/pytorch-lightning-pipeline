@@ -1,0 +1,5 @@
+resample_strategy: "StratifiedGroupKFold"
+resample_params:
+  n_splits: 3
+  shuffle: True
+  random_state: ${general.seed}

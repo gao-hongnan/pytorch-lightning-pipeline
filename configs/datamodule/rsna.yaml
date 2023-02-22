@@ -1,8 +1,8 @@
 defaults:
-    - dataset: base
-    - resample: base
+    - dataset: rsna
+    - resample: rsna
     - transforms: rsna
-    - dataloader: base
+    - dataloader: rsna
 
 datamodule_class:
   _target_: examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule

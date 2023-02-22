@@ -1,7 +1,7 @@
 # Debug
 
 1. No upsample, epoch = 1
-python main.py --config-name rsna \
+python main.py --config-name config \
 general.dataset_stage=train \
 general.debug=True \
 general.device=cpu \
@@ -14,7 +14,7 @@ model.model_class._target_=src.models.model.TimmModelWithGeM
 Epoch 0: 100%|█| 8/8 [00:44<00:00,  5.58s/it, loss=0.653, v_num=0, train_accuracy_step=0.688, train_multiclass_auroc_step=0.483
 
 2. No upsample, epoch = 3
-python main.py --config-name rsna \
+python main.py --config-name config \
 general.dataset_stage=train \
 general.debug=True \
 general.device=cpu \
@@ -28,7 +28,7 @@ Epoch 2: 100%|█| 8/8 [00:27<00:00,  3.45s/it, loss=0.649, v_num=0, train_accur
 
 3. Upsample, epoch = 1
 
-python main.py --config-name rsna \
+python main.py --config-name config \
 general.dataset_stage=train \
 general.debug=True \
 general.device=cpu \
@@ -42,7 +42,7 @@ Epoch 0: 100%|█| 8/8 [00:26<00:00,  3.27s/it, loss=0.634, v_num=0, train_accur
 
 4. No upsample with balanced sampler
 
-python main.py --config-name rsna \
+python main.py --config-name config \
 general.dataset_stage=train \
 general.debug=True \
 general.device=cpu \
