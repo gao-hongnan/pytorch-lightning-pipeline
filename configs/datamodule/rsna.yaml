@@ -1,7 +1,7 @@
 defaults:
     - dataset: rsna
     - resample: rsna
-    - transforms: rsna
+    - transforms: rsna_rectangle
     - dataloader: rsna
 
 datamodule_class:
