@@ -20,7 +20,8 @@ from examples.image_classification.rsna_breast_cancer_detection.datamodule impor
     create_folds,
     preprocess,
 )
-from src.inference import inference_all_folds
+
+# from src.inference import inference_all_folds
 from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
 from src.utils.general import (
     GradCamWrapper,
