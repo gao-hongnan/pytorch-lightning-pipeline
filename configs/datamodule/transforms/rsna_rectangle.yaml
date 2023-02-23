@@ -18,40 +18,57 @@ inverse_std: # 1/std
 mixup: false
 mixup_params: null
 train_transforms:
-  _target_: torchvision.transforms.Compose
+  _target_: albumentations.Compose
   transforms:
-    - _target_: torchvision.transforms.ToPILImage
-    - _target_: torchvision.transforms.RandomResizedCrop
-      size: [1024, 512]
-      scale: [0.8, 1]
-      ratio: [0.45, 0.55]
-    - _target_: torchvision.transforms.RandomVerticalFlip
+    - _target_: albumentations.HorizontalFlip
       p: 0.5
-    - _target_: torchvision.transforms.RandomHorizontalFlip
-      p: 0.5
-    - _target_: torchvision.transforms.RandomRotation
-      degrees: 45
-    - _target_: torchvision.transforms.ToTensor
-    - _target_: torchvision.transforms.Normalize
+    - _target_: albumentations.RandomBrightnessContrast
+      brightness_limit: 0.2
+      contrast_limit: 0.2
+    - _target_: albumentations.ShiftScaleRotate
+      shift_limit: 0.1
+      scale_limit: 0.3
+      rotate_limit: 30
+      border_mode: 0
+      p: 0.7
+    - _target_: albumentations.Cutout
+      num_holes: 5
+      max_h_size: 640 # hardcoded height * 0.3
+      max_w_size: 320 # hardcoded width * 0.3
+      p: 0.25
+    - _target_: albumentations.Resize
+      height: 2048
+      width: 1024
+      always_apply: true
+    - _target_: albumentations.Normalize
       mean: ${datamodule.transforms.mean}
       std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0
 valid_transforms:
-  _target_: torchvision.transforms.Compose
+  _target_: albumentations.Compose
   transforms:
-    - _target_: torchvision.transforms.ToPILImage
-    - _target_: torchvision.transforms.Resize
-      size: [1024, 512]
-    - _target_: torchvision.transforms.ToTensor
-    - _target_: torchvision.transforms.Normalize
+    - _target_: albumentations.Resize
+      height: 2048
+      width: 1024
+      always_apply: true
+    - _target_: albumentations.Normalize
       mean: ${datamodule.transforms.mean}
       std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0
 test_transforms:
-  _target_: torchvision.transforms.Compose
+  _target_: albumentations.Compose
   transforms:
-    - _target_: torchvision.transforms.ToPILImage
-    - _target_: torchvision.transforms.Resize
-      size: [1024, 512]
-    - _target_: torchvision.transforms.ToTensor
-    - _target_: torchvision.transforms.Normalize
+    - _target_: albumentations.Resize
+      height: 2048
+      width: 1024
+      always_apply: true
+    - _target_: albumentations.Normalize
       mean: ${datamodule.transforms.mean}
       std: ${datamodule.transforms.std}
+      max_pixel_value: 255.0
+    - _target_: albumentations.pytorch.transforms.ToTensorV2
+      p: 1.0

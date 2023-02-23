@@ -1,3 +1,10 @@
+"""Inference script for PyTorch Lightning Trainer and normal PyTorch pipeline.
+
+NOTE:
+    There's a lot of repeated code here. Consider using a design
+    pattern to sort it out. An adapter like from_lightning, from_pytorch
+    etc might be helpful.
+"""
 from typing import List
 
 import numpy as np
@@ -9,7 +16,7 @@ from src.models.lightning_module import ImageClassificationLightningModel
 
 
 @torch.inference_mode(mode=True)
-def inference_one_fold(
+def inference_one_fold_with_pytorch_lightning(
     model: ImageClassificationLightningModel,
     checkpoint: str,
     test_loader: DataLoader,
@@ -39,7 +46,7 @@ def inference_one_fold(
 
 
 @torch.inference_mode(mode=True)
-def inference_all_folds(
+def inference_all_folds_with_pytorch_lightning(
     model: ImageClassificationLightningModel,
     checkpoints: List[str],
     test_loader: DataLoader,
@@ -58,7 +65,7 @@ def inference_all_folds(
     all_folds_probs = []
     for _fold_num, checkpoint in enumerate(checkpoints):
         print(f"Predicting fold {_fold_num}")
-        probs = inference_one_fold(
+        probs = inference_one_fold_with_pytorch_lightning(
             model=model, checkpoint=checkpoint, test_loader=test_loader, trainer=trainer
         )
         all_folds_probs.append(probs)
