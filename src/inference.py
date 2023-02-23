@@ -45,7 +45,6 @@ def inference_one_fold(
     probs = []
     for batch in tqdm(test_loader, position=0, leave=True):
         images = batch.to(device, non_blocking=True)
-        print(images[0][0])
         logits = model(images)
         prob = get_sigmoid_softmax(criterion)(logits)
         prob = torch.tensor(prob, dtype=torch.float)

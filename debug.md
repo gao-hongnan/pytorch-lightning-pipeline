@@ -33,10 +33,18 @@ general.dataset_stage=test \
 general.device=cpu \
 general.experiment_id=rsna_debug \
 trainer.max_epochs=3 \
+trainer.precision=32 \
 datamodule.upsample=0 \
 datamodule.datamodule_class._target_=examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule \
 model.model_class._target_=src.models.model.TimmModelWithGeM
 
+float32
+[[0.7353294  0.2646706 ]
+ [0.6602107  0.33978924]
+ [0.73217267 0.2678273 ]
+ [0.3339309  0.66606915]]
+
+ float16 bf16
 [[0.72265625 0.27734375]
  [0.65234375 0.34765625]
  [0.73828125 0.26171875]
