@@ -17,15 +17,15 @@ from examples.image_classification.rsna_breast_cancer_detection.lightning_module
     RSNALightningModel,
 )
 from examples.image_classification.rsna_breast_cancer_detection.datamodule import (
-    create_folds,
+    # create_folds,
     preprocess,
 )
 
-# from src.inference import inference_all_folds
+from src.inference import inference_all_folds
 from src.metrics.pf1 import optimize_thresholds, pfbeta_torch
 from src.utils.general import (
     GradCamWrapper,
-    # create_folds,
+    create_folds,
     read_data_as_df,
     read_experiments_as_df_by_id,
 )
@@ -48,7 +48,7 @@ def run(config: Config) -> None:
         df,
         directory=config.datamodule.dataset.train_dir,
         extension=config.datamodule.dataset.image_extension,
-        nested=True,
+        nested=False,
         config=config,
     )
 
@@ -193,20 +193,44 @@ def run(config: Config) -> None:
         print(f"OOF binarized_pf1: {binarized_pf1} with threshold: {threshold}")
 
     elif config.general.dataset_stage == "test":
-        # python main.py --config-name rsna general.stage=test model.model_name=tf_efficientnetv2_s datamodule.transforms.image_size=512 general.device=mps
+
         dm.setup(stage="test")
         test_loader = dm.test_dataloader()
 
-        experiment_df_path = config.general.experiment_df_path
-        experiment_id = config.general.experiment_id
-        experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
+        # If you have experiment dataframe, then you can do below for modularity
 
-        checkpoints = experiment_df["weight_paths"].values
+        # experiment_df_path = config.general.experiment_df_path
+        # experiment_id = config.general.experiment_id
+        # experiment_df = read_experiments_as_df_by_id(experiment_df_path, experiment_id)
+
+        # checkpoints = experiment_df["weight_paths"].values
+
+        checkpoints = [
+            "outputs/rsna/2023-February-23_16-18-35-rsna_debug/fold_1_epoch=2-valid_multiclass_auroc=0.556452.ckpt"
+        ]
 
         print(f"Checkpoints: {checkpoints}")
 
-        predictions = inference_all_folds(module, checkpoints, test_loader, trainer)
-        print(predictions)
+        adapter = "pytorch_lightning"
+        # adapter = "pytorch"
+        if adapter == "pytorch_lightning":
+
+            predictions = inference_all_folds(
+                module, checkpoints, test_loader, trainer, adapter
+            )
+            print(predictions)
+        elif adapter == "pytorch":
+            model = instantiate(config.model.model_class, config, _recursive_=False)
+
+            predictions = inference_all_folds(
+                model,
+                checkpoints,
+                test_loader,
+                device=config.general.device,
+                criterion=config.criterion.criterion,
+                adapter=adapter,
+            )
+            print(predictions)
 
     elif config.general.dataset_stage == "gradcam":
         dm.setup(stage="train")

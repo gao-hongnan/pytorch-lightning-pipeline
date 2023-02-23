@@ -26,7 +26,29 @@ model.model_class._target_=src.models.model.TimmModelWithGeM
 
 Epoch 2: 100%|█| 8/8 [00:27<00:00,  3.45s/it, loss=0.649, v_num=0, train_accuracy_step=0.812, train_multiclass_auroc_step=0.290 train_binary_pf1_step=0.00533
 
-3. Upsample, epoch = 1
+--- Inference ---
+
+python main.py --config-name config \
+general.dataset_stage=test \
+general.device=cpu \
+general.experiment_id=rsna_debug \
+trainer.max_epochs=3 \
+datamodule.upsample=0 \
+datamodule.datamodule_class._target_=examples.image_classification.rsna_breast_cancer_detection.datamodule.RSNAUpsampleDataModule \
+model.model_class._target_=src.models.model.TimmModelWithGeM
+
+[[0.72265625 0.27734375]
+ [0.65234375 0.34765625]
+ [0.73828125 0.26171875]
+ [0.31445312 0.68359375]]
+
+# pytorch
+ 0.0061])), ('backbone.layer4.1.bn2.num_batches_tracked', tensor(12))
+('head.bias', tensor([0.0433, 0.0008]))])
+# pytorch lightning
+ ('model.head.bias', tensor([0.0427, 0.0014]))])
+
+1. Upsample, epoch = 1
 
 python main.py --config-name config \
 general.dataset_stage=train \

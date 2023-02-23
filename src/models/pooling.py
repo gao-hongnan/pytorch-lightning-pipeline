@@ -28,8 +28,8 @@ class GeM(nn.Module):
             inputs.clamp(min=self.eps).pow(self.p), (inputs.size(-2), inputs.size(-1))
         ).pow(1.0 / self.p)
 
-    def __repr__(self) -> str:
-        return (
-            self.__class__.__name__
-            + f"(p={self.p.data.tolist()[0]:.4f},eps={self.eps})"
-        )
+    # def __repr__(self) -> str:
+    #     return (
+    #         self.__class__.__name__
+    #         + f"(p={self.p.data.tolist()[0]:.4f},eps={self.eps})"
+    #     )

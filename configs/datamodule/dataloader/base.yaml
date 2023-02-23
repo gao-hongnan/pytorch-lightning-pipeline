@@ -14,7 +14,7 @@ valid_loader:
     collate_fn: null
 test_loader:
     batch_size: 32
-    num_workers: 2
+    num_workers: 0
     pin_memory: False
     drop_last: False
     shuffle: False

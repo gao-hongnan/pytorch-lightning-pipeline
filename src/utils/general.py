@@ -161,13 +161,13 @@ def return_filepath(
     return image_path
 
 
-def get_sigmoid_softmax(config: Config) -> Union[nn.Sigmoid, nn.Softmax]:
+def get_sigmoid_softmax(criterion: str) -> Union[nn.Sigmoid, nn.Softmax]:
     """Get the sigmoid or softmax function depending on loss function."""
-    assert config.criterion.criterion in [
+    assert criterion in [
         "BCEWithLogitsLoss",
         "CrossEntropyLoss",
     ], "Criterion not supported"
-    if config.criterion.criterion == "CrossEntropyLoss":
+    if criterion == "CrossEntropyLoss":
         return getattr(nn, "Softmax")(dim=1)
     return getattr(nn, "Sigmoid")()
 
@@ -195,13 +195,4 @@ def create_folds(df: pd.DataFrame, config: Config) -> pd.DataFrame:
         df.loc[valid_idx, "fold"] = _fold + 1
     df["fold"] = df["fold"].astype(int)
     print(df.groupby(["fold", config.datamodule.dataset.target_col_name]).size())
-    return df
-
-
-def upsample_df(df: pd.DataFrame, config: Config) -> pd.DataFrame:
-    # Upsample cancer data
-    # (from https://www.kaggle.com/code/awsaf49/rsna-bcd-efficientnet-tf-tpu-1vm-train)
-    pos_df = df[df.cancer == 1].sample(frac=config.datamodule.upsample, replace=True)
-    neg_df = df[df.cancer == 0]
-    df = pd.concat([pos_df, neg_df], axis=0, ignore_index=True)
     return df

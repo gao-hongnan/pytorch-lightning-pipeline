@@ -6,9 +6,16 @@ from sklearn import model_selection
 
 from src.datamodules.datamodule import ImageClassificationDataModule
 from src.datamodules.dataset import ImageClassificationDataset
-from src.utils.general import upsample_df, return_filepath
+from src.utils.general import return_filepath
 from configs.base import Config
 
+def upsample_df(df: pd.DataFrame, config: Config) -> pd.DataFrame:
+    # Upsample cancer data
+    # (from https://www.kaggle.com/code/awsaf49/rsna-bcd-efficientnet-tf-tpu-1vm-train)
+    pos_df = df[df.cancer == 1].sample(frac=config.datamodule.upsample, replace=True)
+    neg_df = df[df.cancer == 0]
+    df = pd.concat([pos_df, neg_df], axis=0, ignore_index=True)
+    return df
 
 def preprocess(
     df: pd.DataFrame, directory: str, extension: str, nested: bool, config: Config
