@@ -81,7 +81,7 @@ def run(config: Config) -> None:
     # say `cfg` or use positional arguments.
     # model = instantiate(config=model, config=config, _recursive_=False)
     model = instantiate(config.model.model_class, config, _recursive_=False)
-    # model.model_summary()
+    model.model_summary()
 
     if config.general.resume_from_checkpoint is None:
         module = RSNALightningModel(config, model)
