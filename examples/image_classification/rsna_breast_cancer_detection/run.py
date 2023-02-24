@@ -115,7 +115,7 @@ def run(config: Config) -> None:
         # python main.py --config-name rsna general.dataset_stage=evaluate
         # TODO: currently experiment_df is hardcoded, manually adding experiment artifacts.
         print("Evaluate mode")
-        dm.setup(stage="evaluate")
+        # dm.setup(stage="evaluate") # not using lightning's evaluate for now, since it's not flexible enough.
         df_oof = df_folds.copy()
 
         experiment_df_path = config.general.experiment_df_path

@@ -9,6 +9,7 @@ from src.datamodules.dataset import ImageClassificationDataset
 from src.utils.general import return_filepath
 from configs.base import Config
 
+
 def upsample_df(df: pd.DataFrame, config: Config) -> pd.DataFrame:
     # Upsample cancer data
     # (from https://www.kaggle.com/code/awsaf49/rsna-bcd-efficientnet-tf-tpu-1vm-train)
@@ -16,6 +17,7 @@ def upsample_df(df: pd.DataFrame, config: Config) -> pd.DataFrame:
     neg_df = df[df.cancer == 0]
     df = pd.concat([pos_df, neg_df], axis=0, ignore_index=True)
     return df
+
 
 def preprocess(
     df: pd.DataFrame, directory: str, extension: str, nested: bool, config: Config
@@ -45,9 +47,10 @@ def preprocess(
 
 
 def create_folds(df: pd.DataFrame, config: Config) -> pd.DataFrame:
-    """Create a new column called "fold" and assign fold number to each row. Omit the use
-    of train_test_split since the same result can be achieved by using
-    (Stratified)KFold with n_splits=2."""
+    """Create a new column called "fold" and assign fold number to each row.
+    Omit the use of train_test_split since the same result can be achieved by using
+    (Stratified)KFold with n_splits=2.
+    """
     cv = getattr(model_selection, config.datamodule.resample.resample_strategy)(
         **config.datamodule.resample.resample_params
     )
