@@ -32,7 +32,7 @@ from src.utils.general import (
 
 ### NOTE ###
 # If debug mode, import create_folds from src.utils.general
-# and use nested=False in preprocess.
+# and use nested=False in preprocess. See commit c040df6 for sanity check.
 
 # pylint: disable=all
 def run(config: Config) -> None:
