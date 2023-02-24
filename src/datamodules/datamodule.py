@@ -49,6 +49,8 @@ class ImageClassificationDataModule(pl.LightningDataModule):
         - fit, evaluate, predict etc."""
         print(f"Stage: {stage}")
         print(f"Using Fold Number {self.fold}")
+        # FIXME: now no matter what stage, train_df and valid_df will be run. Not good
+        # if I use stage=="test".
         self.train_df = self.df_folds[self.df_folds["fold"] != self.fold].reset_index(
             drop=True
         )
@@ -71,19 +73,19 @@ class ImageClassificationDataModule(pl.LightningDataModule):
             self.train_dataset = ImageClassificationDataset(
                 self.config,
                 df=self.train_df,
-                stage="train",
+                dataset_stage="train",
                 transforms=train_transforms,
             )
             self.valid_dataset = ImageClassificationDataset(
                 self.config,
                 df=self.valid_df,
-                stage="valid",
+                dataset_stage="valid",
                 transforms=valid_transforms,
             )
             self.gradcam_dataset = ImageClassificationDataset(
                 self.config,
                 df=self.valid_df,
-                stage="gradcam",
+                dataset_stage="gradcam",
                 transforms=valid_transforms,
             )
 
@@ -92,7 +94,7 @@ class ImageClassificationDataModule(pl.LightningDataModule):
             self.test_dataset = ImageClassificationDataset(
                 self.config,
                 df=self.test_df,
-                stage="test",
+                dataset_stage="test",
                 transforms=test_transforms,
             )
 
