@@ -87,8 +87,9 @@ class TimmModelWithGeM(TimmModel):
 
     def __init__(self, config: Config) -> None:
         super().__init__(config)
-        # no super init because we don't want to call the parent's init
+        # no need super init because we don't want to call the parent's init
         # as run_sanity_check will fail in parent class with new attribute gem
+        # did not remove to have reproducibility but in future should remove.
         self.model_name = config.model.model_name
         self.global_pool = config.model.global_pool
         self.num_classes = config.model.num_classes
