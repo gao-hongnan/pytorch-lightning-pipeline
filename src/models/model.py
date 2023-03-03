@@ -62,10 +62,10 @@ class TimmModel(Model):
 
     def run_sanity_check(self) -> None:
         """Post init sanity check."""
-        inputs = torch.randn(4, 3, 224, 224)  # assume 3 channel images
+        inputs = torch.randn(4, self.in_chans, 224, 224)
         features = self.forward_features(inputs)
-        logits = self.forward_head(features)
         print(f"Features shape: {features.shape}")
+        logits = self.forward_head(features)
         print(f"Logits shape: {logits.shape}")
 
     def __str__(self):

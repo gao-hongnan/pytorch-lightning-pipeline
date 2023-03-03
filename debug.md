@@ -1,5 +1,8 @@
 # Debug
 
+If debug mode, import create_folds from src.utils.general
+and use nested=False in preprocess. See commit c040df6 for sanity check.
+
 1. No upsample, epoch = 1
 python main.py --config-name config \
 general.dataset_stage=train \
